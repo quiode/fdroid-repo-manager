@@ -27,6 +27,9 @@
       "request": "launch",
       "name": "Debug unit tests in executable 'fdroid-repo-manager'",
       "cargo": {
+        "env": {
+          "RUST_LOG": "DEBUG"
+        },
         "args": [
           "test",
           "--no-run",
