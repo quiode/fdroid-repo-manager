@@ -1,5 +1,6 @@
 FROM rust:1-bullseye
 RUN apt-get update && apt-get install -y fdroidserver nginx && rm -rf /var/lib/apt/lists/*
+RUN cargo install cargo-watch
 
 # Fdroid Setup
 WORKDIR /fdroid
@@ -13,5 +14,5 @@ VOLUME [ "/app" ]
 EXPOSE 80
 ENV RUST_LOG=debug
 HEALTHCHECK CMD (curl -f http://localhost/fdroid/repo && curl -f http://localhost/health) || exit 1
-CMD ["cargo watch -x run"]
+CMD cargo watch -x run
 

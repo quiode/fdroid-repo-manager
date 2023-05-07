@@ -3,3 +3,4 @@ Dockerfile
 .git
 ./gitignore
 debug
+.vscode
