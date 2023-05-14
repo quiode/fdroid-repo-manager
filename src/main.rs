@@ -1,16 +1,14 @@
-use std::env;
+mod utils;
+mod routes;
 
+use actix_web::middleware;
 use actix_web::{ HttpServer, HttpResponse, Responder, App, get, web, middleware::Logger };
 use actix_files as fs;
 use env_logger::Env;
 use log::{ info, debug };
 
-#[derive(Clone, Debug)]
-struct AppConfig {
-    port: u16,
-    ip: String,
-    repo_path: String,
-}
+use crate::utils::app_config::AppConfig;
+use crate::routes::config::get_config;
 
 #[get("/health")]
 async fn health() -> impl Responder {
@@ -23,11 +21,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     // App Config
-    let app_config = AppConfig {
-        ip: env::var("RM_IP").unwrap_or("127.0.0.1".to_string()),
-        port: env::var("RM_PORT").unwrap_or("80".to_string()).parse().unwrap_or(80),
-        repo_path: env::var("RM_REPO_PATH").unwrap_or("/fdroid".to_string()),
-    };
+    let app_config = AppConfig::from_env();
 
     let app_config_clone = app_config.clone();
 
@@ -38,10 +32,30 @@ async fn main() -> std::io::Result<()> {
         let logger = Logger::default();
 
         App::new()
+            // provide app config
             .app_data(web::Data::new(app_config.clone()))
+            // normalize routes (add / to all routes)
+            .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Always))
+            // add logger as middleware
             .wrap(logger)
+            // health service for HEALTHCHECK in docker
             .service(health)
-            .service(fs::Files::new("/fdroid", &app_config.repo_path))
+            // fdroid repo for fdroid
+            .service(
+                fs::Files
+                    ::new("/fdroid", &app_config.repo_path)
+                    .show_files_listing()
+                    // remove acces to hidden files
+                    .path_filter(|path, _| {
+                        // files that shouldn't be accessible
+                        let hidden_files = vec!["config.yml", "keystore.p12"];
+                        path.file_name()
+                            .map(|file_name| !hidden_files.contains(&file_name.to_str().unwrap()))
+                            .unwrap_or(true)
+                    })
+            )
+            // config services for manipulating fdroid config file
+            .service(web::scope("/config").service(get_config))
     })
         .bind((app_config_clone.ip.as_str(), app_config_clone.port))?
         .run().await
