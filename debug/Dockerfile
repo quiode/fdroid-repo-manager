@@ -13,6 +13,7 @@ COPY . .
 VOLUME [ "/app" ]
 EXPOSE 80
 ENV RUST_LOG=debug
-HEALTHCHECK CMD (curl -f http://localhost/fdroid/repo && curl -f http://localhost/health) || exit 1
+ENV RM_IP=0.0.0.0
+HEALTHCHECK CMD (curl -f http://localhost/fdroid/config.yml && curl -f http://localhost/health) || exit 1
 CMD cargo watch -x run
 
