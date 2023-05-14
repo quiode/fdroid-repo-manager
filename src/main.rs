@@ -24,9 +24,9 @@ async fn main() -> std::io::Result<()> {
 
     // App Config
     let app_config = AppConfig {
-        ip: env::var("HOSTNAME").unwrap_or("127.0.0.1".to_string()),
-        port: env::var("PORT").unwrap_or("80".to_string()).parse().unwrap_or(80),
-        repo_path: env::var("REPO_PATH").unwrap_or("/fdroid".to_string()),
+        ip: env::var("RM_IP").unwrap_or("127.0.0.1".to_string()),
+        port: env::var("RM_PORT").unwrap_or("80".to_string()).parse().unwrap_or(80),
+        repo_path: env::var("RM_REPO_PATH").unwrap_or("/fdroid".to_string()),
     };
 
     let app_config_clone = app_config.clone();
