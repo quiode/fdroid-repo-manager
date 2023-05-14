@@ -11,11 +11,18 @@ pub struct AppConfig {
     pub ip: String,
     // RM_REPO_PATH
     pub repo_path: String,
+    // RM_ADMIN_PASSWORD
+    pub admin_password: String,
 }
 
 impl Default for AppConfig {
     fn default() -> Self {
-        Self { port: 80, ip: "127.0.0.1".to_string(), repo_path: "/fdroid".to_string() }
+        Self {
+            port: 80,
+            ip: "127.0.0.1".to_string(),
+            repo_path: "/fdroid".to_string(),
+            admin_password: "admin".to_string(),
+        }
     }
 }
 
@@ -33,6 +40,7 @@ impl AppConfig {
                 .unwrap_or(default.port),
             ip: env::var("RM_IP").unwrap_or(default.ip),
             repo_path: env::var("REPO_PATH").unwrap_or(default.repo_path),
+            admin_password: env::var("RM_ADMIN_PASSWORD").unwrap_or(default.admin_password),
         }
     }
 }

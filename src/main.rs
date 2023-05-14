@@ -1,5 +1,6 @@
 mod utils;
 mod routes;
+mod guards;
 
 use actix_web::middleware;
 use actix_web::{ HttpServer, HttpResponse, Responder, App, get, web, middleware::Logger };
@@ -9,6 +10,7 @@ use log::{ info, debug };
 
 use crate::utils::app_config::AppConfig;
 use crate::routes::config::get_config;
+use crate::guards::auth_guard::AuthGuard;
 
 #[get("/health")]
 async fn health() -> impl Responder {
@@ -40,6 +42,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(logger)
             // health service for HEALTHCHECK in docker
             .service(health)
+            .route("/", web::route().guard(AuthGuard).to(HttpResponse::Unauthorized))
             // fdroid repo for fdroid
             .service(
                 fs::Files
@@ -55,7 +58,7 @@ async fn main() -> std::io::Result<()> {
                     })
             )
             // config services for manipulating fdroid config file
-            .service(web::scope("/config").service(get_config))
+            .service(web::scope("/config").service(get_config).guard(AuthGuard))
     })
         .bind((app_config_clone.ip.as_str(), app_config_clone.port))?
         .run().await
