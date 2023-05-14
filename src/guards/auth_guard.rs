@@ -8,6 +8,7 @@ impl Guard for AuthGuard {
     fn check(&self, req: &GuardContext) -> bool {
         let app_config = AppConfig::from_env();
 
+        // check that password in header (RM-Password) equals password set in environment variables
         req.head()
             .headers()
             .get("RM-Password")
