@@ -37,7 +37,7 @@ async fn main() -> std::io::Result<()> {
             // provide app config
             .app_data(web::Data::new(app_config.clone()))
             // normalize routes (add / to all routes)
-            .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Always))
+            .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Trim))
             // add logger as middleware
             .wrap(logger)
             // health service for HEALTHCHECK in docker
