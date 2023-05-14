@@ -42,7 +42,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(logger)
             // health service for HEALTHCHECK in docker
             .service(health)
-            .route("/", web::route().guard(AuthGuard).to(HttpResponse::Unauthorized))
             // fdroid repo for fdroid
             .service(
                 fs::Files
