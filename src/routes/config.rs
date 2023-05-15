@@ -1,3 +1,4 @@
+//! Route used to edit the config.yml file
 use actix_web::{ get, web::{ self, Json } };
 
 use crate::utils::{ config_editor::{ self, ConfigFile }, app_config::AppConfig, error::Result };
