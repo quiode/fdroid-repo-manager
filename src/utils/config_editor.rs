@@ -41,6 +41,7 @@ impl ConfigFile {
 }
 
 /// Part of the config file that can be changed
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PublicConfig {
     repo_url: Option<String>,
     repo_name: Option<String>,
