@@ -8,7 +8,7 @@ use actix_files as fs;
 use env_logger::Env;
 use log::{ info, debug };
 
-use crate::routes::config::get_config;
+use crate::routes::config::{ get_config, post_config };
 use crate::utils::app_config::AppConfig;
 use crate::guards::auth_guard::AuthGuard;
 
@@ -57,7 +57,9 @@ async fn main() -> std::io::Result<()> {
                     })
             )
             // config services for manipulating fdroid config file
-            .service(web::scope("/config").service(get_config).guard(AuthGuard))
+            .service(
+                web::scope("/config").service(get_config).service(post_config).guard(AuthGuard)
+            )
     })
         .bind((app_config_clone.ip.as_str(), app_config_clone.port))?
         .run().await

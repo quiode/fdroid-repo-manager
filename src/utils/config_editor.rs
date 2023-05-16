@@ -6,6 +6,7 @@ use super::error::{ Error, Result };
 /// Actual Structure of the config.yml file
 #[derive(Serialize, Deserialize, Debug)]
 struct ConfigFile {
+    // immutable part
     sdk_path: String,
     repo_keyalias: String,
     keystore: String,
@@ -13,11 +14,18 @@ struct ConfigFile {
     keypass: String,
     keydname: String,
     apksigner: String,
-    repo_url: Option<String>,
-    repo_name: Option<String>,
-    repo_icon: Option<String>,
-    archive_icon: Option<String>,
-    repo_description: Option<String>,
+    // changeaple part
+    // repo
+    repo_url: String,
+    repo_name: String,
+    repo_icon: String,
+    repo_description: String,
+    // archive
+    archive_url: String,
+    archive_name: String,
+    archive_icon: String,
+    archive_description: String,
+    archive_older: u8,
 }
 
 impl ConfigFile {
@@ -31,11 +39,15 @@ impl ConfigFile {
             keypass: self.keypass.clone(),
             keydname: self.keydname.clone(),
             apksigner: self.apksigner.clone(),
-            repo_url: public.repo_url.clone().or(self.repo_url.clone()),
-            repo_name: public.repo_name.clone().or(self.repo_name.clone()),
-            repo_icon: public.repo_icon.clone().or(self.repo_icon.clone()),
-            archive_icon: public.archive_icon.clone().or(self.archive_icon.clone()),
-            repo_description: public.repo_description.clone().or(self.repo_description.clone()),
+            repo_url: public.repo_url.clone(),
+            repo_name: public.repo_name.clone(),
+            repo_icon: public.repo_icon.clone(),
+            archive_icon: public.archive_icon.clone(),
+            repo_description: public.repo_description.clone(),
+            archive_description: public.archive_description.clone(),
+            archive_name: public.archive_name.clone(),
+            archive_older: public.archive_older,
+            archive_url: public.archive_url.clone(),
         }
     }
 }
@@ -43,11 +55,17 @@ impl ConfigFile {
 /// Part of the config file that can be changed
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PublicConfig {
-    repo_url: Option<String>,
-    repo_name: Option<String>,
-    repo_icon: Option<String>,
-    archive_icon: Option<String>,
-    repo_description: Option<String>,
+    // repo
+    repo_url: String,
+    repo_name: String,
+    repo_icon: String,
+    repo_description: String,
+    // archive
+    archive_url: String,
+    archive_name: String,
+    archive_icon: String,
+    archive_description: String,
+    archive_older: u8,
 }
 
 impl From<ConfigFile> for PublicConfig {
@@ -56,8 +74,12 @@ impl From<ConfigFile> for PublicConfig {
             repo_url: value.repo_url,
             repo_name: value.repo_name,
             repo_icon: value.repo_icon,
-            archive_icon: value.archive_icon,
             repo_description: value.repo_description,
+            archive_url: value.archive_url,
+            archive_name: value.archive_name,
+            archive_icon: value.archive_icon,
+            archive_description: value.archive_description,
+            archive_older: value.archive_older,
         }
     }
 }
