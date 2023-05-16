@@ -1,7 +1,12 @@
-use std::fs::{ self };
+//! Extension of Repository used to modify the config file
+
+use std::fs;
+
 use serde::{ Serialize, Deserialize };
 
-use super::error::{ Error, Result };
+use crate::utils::error::{ Result, Error };
+
+use super::Repository;
 
 /// Actual Structure of the config.yml file
 #[derive(Serialize, Deserialize, Debug)]
@@ -84,32 +89,34 @@ impl From<ConfigFile> for PublicConfig {
     }
 }
 
-/// Get Public Part of the Config File
-pub fn get_public_config(file_path: &String) -> Result<PublicConfig> {
-    get_config(file_path).map(|config| config.into())
-}
+impl Repository {
+    /// Get Public Part of the Config File
+    pub fn get_public_config(&self) -> Result<PublicConfig> {
+        self.get_config().map(|config| config.into())
+    }
 
-// Set Config (don't change private part of the config file)
-pub fn set_config(file_path: &String, public_config: &PublicConfig) -> Result<()> {
-    let config_file = get_config(file_path)?;
+    // Set Config (don't change private part of the config file)
+    pub fn set_config(&self, public_config: &PublicConfig) -> Result<()> {
+        let config_file = self.get_config()?;
 
-    let merged_config = config_file.merge_with_public(public_config);
+        let merged_config = config_file.merge_with_public(public_config);
 
-    write_to_config(file_path, &merged_config)
-}
+        self.write_to_config(&merged_config)
+    }
 
-/// Get Config File as it is
-fn get_config(file_path: &String) -> Result<ConfigFile> {
-    let yml_string = fs::read_to_string(file_path).map_err(Error::from)?;
+    /// Get Config File as it is
+    fn get_config(&self) -> Result<ConfigFile> {
+        let yml_string = fs::read_to_string(self.get_config_path()).map_err(Error::from)?;
 
-    return serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from);
-}
+        return serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from);
+    }
 
-/// writes to the actual config file
-fn write_to_config(file_path: &String, config_file: &ConfigFile) -> Result<()> {
-    // convert to yml string
-    let yml_string = serde_yaml::to_string(config_file).map_err(Error::from)?;
+    /// writes to the actual config file
+    fn write_to_config(&self, config_file: &ConfigFile) -> Result<()> {
+        // convert to yml string
+        let yml_string = serde_yaml::to_string(config_file).map_err(Error::from)?;
 
-    // write to file
-    fs::write(file_path, yml_string).map_err(Error::from)
+        // write to file
+        fs::write(self.get_config_path(), yml_string).map_err(Error::from)
+    }
 }

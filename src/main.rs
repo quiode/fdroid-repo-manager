@@ -1,12 +1,14 @@
 mod utils;
 mod routes;
 mod guards;
+mod repository;
 
 use actix_web::middleware;
 use actix_web::{ HttpServer, HttpResponse, Responder, App, get, web, middleware::Logger };
 use actix_files as fs;
 use env_logger::Env;
 use log::{ info, debug };
+use repository::Repository;
 
 use crate::routes::config::{ get_config, post_config };
 use crate::utils::app_config::AppConfig;
@@ -30,12 +32,15 @@ async fn main() -> std::io::Result<()> {
     info!("Server started!");
     debug!("App Config: {:#?}", app_config);
 
+    let fdroid_repository = web::Data::new(Repository::new(&app_config.repo_path));
     HttpServer::new(move || {
         let logger = Logger::default();
 
         App::new()
             // provide app config
             .app_data(web::Data::new(app_config.clone()))
+            // provide fdroid repository
+            .app_data(fdroid_repository.clone())
             // normalize routes (add / to all routes)
             .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Trim))
             // add logger as middleware
