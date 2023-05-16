@@ -21,16 +21,16 @@ struct ConfigFile {
     apksigner: String,
     // changeaple part
     // repo
-    repo_url: String,
-    repo_name: String,
-    repo_icon: String,
-    repo_description: String,
+    repo_url: Option<String>,
+    repo_name: Option<String>,
+    repo_icon: Option<String>,
+    repo_description: Option<String>,
     // archive
-    archive_url: String,
-    archive_name: String,
-    archive_icon: String,
-    archive_description: String,
-    archive_older: u8,
+    archive_url: Option<String>,
+    archive_name: Option<String>,
+    archive_icon: Option<String>,
+    archive_description: Option<String>,
+    archive_older: Option<u8>,
 }
 
 impl ConfigFile {
@@ -61,16 +61,16 @@ impl ConfigFile {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PublicConfig {
     // repo
-    repo_url: String,
-    repo_name: String,
-    repo_icon: String,
-    repo_description: String,
+    repo_url: Option<String>,
+    repo_name: Option<String>,
+    repo_icon: Option<String>,
+    repo_description: Option<String>,
     // archive
-    archive_url: String,
-    archive_name: String,
-    archive_icon: String,
-    archive_description: String,
-    archive_older: u8,
+    archive_url: Option<String>,
+    archive_name: Option<String>,
+    archive_icon: Option<String>,
+    archive_description: Option<String>,
+    archive_older: Option<u8>,
 }
 
 impl From<ConfigFile> for PublicConfig {
