@@ -31,6 +31,7 @@ struct ConfigFile {
     archive_icon: Option<String>,
     archive_description: Option<String>,
     archive_older: Option<u8>,
+    // TODO: update_stats
 }
 
 impl ConfigFile {
