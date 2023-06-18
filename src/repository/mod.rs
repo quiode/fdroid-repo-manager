@@ -3,6 +3,7 @@ use std::{path::PathBuf, process::Command};
 use log::info;
 
 pub mod config;
+pub mod app;
 
 #[derive(Debug, Clone)]
 pub struct Repository {
