@@ -118,6 +118,9 @@ impl Repository {
         let yml_string = serde_yaml::to_string(config_file).map_err(Error::from)?;
 
         // write to file
-        fs::write(self.get_config_path(), yml_string).map_err(Error::from)
+        fs::write(self.get_config_path(), yml_string).map_err(Error::from)?;
+
+        // update repository
+        self.update()
     }
 }

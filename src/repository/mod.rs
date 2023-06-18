@@ -1,9 +1,11 @@
 use std::{path::PathBuf, process::Command};
 
-use log::info;
+use log::{debug, info, warn};
 
-pub mod config;
+use crate::utils::error::{Error, Result};
+
 pub mod app;
+pub mod config;
 
 #[derive(Debug, Clone)]
 pub struct Repository {
@@ -37,10 +39,29 @@ impl Repository {
     fn initialize(&self) {
         info!("Initializing a new fdroid repository!");
 
-        Command::new("fdroid")
-            .arg("init")
-            .current_dir(&self.path)
-            .spawn()
+        self.run("init", &vec![])
             .expect("Failed to initialize the repository!");
+    }
+
+    /// Runs "fdroid update -c"
+    fn update(&self) -> Result<()> {
+        debug!("Updating Repository (Running fdroid update -c)");
+
+        self.run("update", &vec!["-c"])
+    }
+
+    /// Runs an fdroid command with the specified arguments
+    fn run(&self, command: &str, args: &Vec<&str>) -> Result<()> {
+        let run_result = Command::new("fdroid")
+            .arg(command)
+            .args(args)
+            .current_dir(&self.path)
+            .spawn();
+
+        if run_result.is_err() {
+            warn!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
+        }
+
+        run_result.map(|_| ()).map_err(Error::from)
     }
 }
