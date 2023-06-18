@@ -20,7 +20,7 @@ impl Guard for AuthGuard {
 
                 let str_password = opt_password.unwrap();
 
-                str_password == app_config.admin_password
+                str_password == app_config.admin_password.to_string()
             })
             .unwrap_or(false)
     }

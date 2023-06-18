@@ -16,10 +16,11 @@ impl Repository {
 
     // Create a new repository with the provided path
     /// Runs fdroid init if config.yml misses
-    pub fn new(path: &String) -> Self {
+    pub fn new(path: PathBuf) -> Self {
         let repository = Self {
-            path: PathBuf::from(path),
+            path,
         };
+
         // check if config.yml exists
         if repository.get_config_path().exists() {
             return repository;

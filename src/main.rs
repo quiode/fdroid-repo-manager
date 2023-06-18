@@ -11,7 +11,7 @@ use log::{ info, debug };
 use repository::Repository;
 
 use crate::routes::config::{ get_config, post_config };
-use crate::utils::app_config::AppConfig;
+use crate::utils::app_config::{AppConfig, WrappedValue};
 use crate::guards::auth_guard::AuthGuard;
 
 #[get("/health")]
@@ -32,7 +32,7 @@ async fn main() -> std::io::Result<()> {
     info!("Server started!");
     debug!("App Config: {:#?}", app_config);
 
-    let fdroid_repository = web::Data::new(Repository::new(&app_config.repo_path));
+    let fdroid_repository = web::Data::new(Repository::new(app_config.repo_path.value().clone()));
     HttpServer::new(move || {
         let logger = Logger::default();
 
@@ -50,7 +50,7 @@ async fn main() -> std::io::Result<()> {
             // fdroid repo for fdroid
             .service(
                 fs::Files
-                    ::new("/fdroid", &app_config.repo_path)
+                    ::new("/fdroid", app_config.repo_path.value())
                     .show_files_listing()
                     // remove acces to hidden files
                     .path_filter(|path, _| {
@@ -66,6 +66,6 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/config").service(get_config).service(post_config).guard(AuthGuard)
             )
     })
-        .bind((app_config_clone.ip.as_str(), app_config_clone.port))?
+        .bind((app_config_clone.ip.value().clone(), app_config_clone.port.value().clone()))?
         .run().await
 }
