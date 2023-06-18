@@ -4,5 +4,6 @@ services:
     build: .
     volumes:
       - ../:/app
+      - ./fdroid:/fdroid
     ports:
       - "8080:80"

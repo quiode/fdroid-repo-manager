@@ -34,7 +34,7 @@ struct ConfigFile {
 }
 
 impl ConfigFile {
-    /// Creates new ConfigFile with public fields, if they exist, else own
+    /// Creates new ConfigFile with public fields
     fn merge_with_public(&self, public: &PublicConfig) -> Self {
         Self {
             sdk_path: self.sdk_path.clone(),

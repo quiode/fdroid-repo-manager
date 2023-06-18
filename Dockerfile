@@ -14,6 +14,7 @@ RUN fdroid init
 # API Setup
 COPY --from=builder /usr/local/cargo/bin/fdroid-repo-manager /usr/local/bin/fdroid-repo-manager
 ENV RM_IP=0.0.0.0
+ENV ANDROID_HOME=/usr/lib/android-sdk
 HEALTHCHECK CMD (curl -f http://localhost/fdroid/repo && curl -f http://localhost/health) || exit 1
 EXPOSE 80
 CMD ["fdroid-repo-manager"]
