@@ -7,12 +7,12 @@ use super::Repository;
 #[derive(Clone, Serialize)]
 pub struct App {
   categories: Vec<String>,
-  suggestedVersionCode: String,
+  suggested_version_code: String,
   license: String,
   name: String,
   added: i64,
-  packageName: String,
-  lastUpdated: i64,
+  package_name: String,
+  last_updated: i64,
   packages: Vec<Package>,
 }
 
@@ -25,10 +25,10 @@ impl App {
 
     for app in apps.as_array()? {
       let name = app.get("name")?.as_str()?.to_owned();
-      let suggestedVersionCode = app.get("suggestedVersionCode")?.as_str()?.to_owned();
+      let suggested_version_code = app.get("suggestedVersionCode")?.as_str()?.to_owned();
       let license = app.get("license")?.as_str()?.to_owned();
-      let packageName = app.get("packageName")?.as_str()?.to_owned();
-      let lastUpdated = app.get("lastUpdated")?.as_i64()?.to_owned();
+      let package_name = app.get("packageName")?.as_str()?.to_owned();
+      let last_updated = app.get("lastUpdated")?.as_i64()?.to_owned();
       let added = app.get("added")?.as_i64()?.to_owned();
 
       let mut categories = vec![];
@@ -40,10 +40,10 @@ impl App {
 
       apps_vec.push(App {
         name,
-        suggestedVersionCode,
+        suggested_version_code,
         license,
-        packageName,
-        lastUpdated,
+        package_name,
+        last_updated,
         added,
         packages,
         categories,
@@ -57,21 +57,21 @@ impl App {
 #[derive(Clone, Serialize)]
 pub struct Package {
   added: i64,
-  apkName: String,
+  apk_name: String,
   hash: String,
-  hashType: String,
-  maxSdkVersion: u32,
-  minSdkVersion: u32,
+  hash_type: String,
+  max_sdk_version: u32,
+  min_sdk_version: u32,
   nativecode: Vec<String>,
-  packageName: String,
+  package_name: String,
   sig: String,
   signer: String,
   size: u64,
-  targetSdkVersion: u32,
-  usesPermission: Vec<(String, u32)>,
-  usesPermissionSdk23: Vec<(String, u32)>,
-  versionCode: u64,
-  versionName: String,
+  target_sdk_version: u32,
+  uses_permission: Vec<(String, u32)>,
+  uses_permission_sdk23: Vec<(String, u32)>,
+  version_code: u64,
+  version_name: String,
 }
 
 impl TryFrom<serde_json::Value> for Package {
