@@ -17,12 +17,17 @@ pub struct App {
 }
 
 impl App {
-  fn from_json(value: serde_json::Value) -> Option<Vec<Self>> {
+  /// Reads a Json Value and tries to extract all fields to create an instance of App
+  /// 
+  /// returns None if any field can't be converted
+  fn from_json(value: &serde_json::Value) -> Option<Vec<Self>> {
+    // get both lists
     let apps = value.get("apps")?;
     let packages = value.get("packages")?;
 
     let mut apps_vec = vec![];
 
+    // map all app fields
     for app in apps.as_array()? {
       let name = app.get("name")?.as_str()?.to_owned();
       let suggested_version_code = app.get("suggestedVersionCode")?.as_str()?.to_owned();
@@ -33,10 +38,19 @@ impl App {
 
       let mut categories = vec![];
 
-      let mut packages = vec![];
+      // get all categories (are saved in a map)
+      for category in app.get("categories")?.as_object()?.values() {
+        categories.push(category.as_str()?.to_string());
+      }
 
-      // TODO
-      todo!();
+      let mut packages_vec = vec![];
+
+      let package = packages.get(&package_name)?;
+
+      // map all package fields
+      for package_entry in package.as_object()?.values() {
+        packages_vec.push(Package::from_json(package_entry)?);
+      }
 
       apps_vec.push(App {
         name,
@@ -45,7 +59,7 @@ impl App {
         package_name,
         last_updated,
         added,
-        packages,
+        packages: packages_vec,
         categories,
       });
     }
@@ -74,10 +88,9 @@ pub struct Package {
   version_name: String,
 }
 
-impl TryFrom<serde_json::Value> for Package {
-  type Error = Error;
-
-  fn try_from(value: serde_json::Value) -> Result<Self> {
+impl Package {
+  fn from_json(value: &serde_json::Value) -> Option<Self> {
+    // TODO
     todo!()
   }
 }
@@ -85,7 +98,7 @@ impl TryFrom<serde_json::Value> for Package {
 impl Repository {
   pub fn get_apps(&self) -> Result<Vec<App>> {
     App::from_json(
-      serde_json::from_str(self.path.join("/repo/index-v1.json").to_str().ok_or(
+      &serde_json::from_str(self.path.join("/repo/index-v1.json").to_str().ok_or(
         Error::JsonConvertError("Could not read repository index file!".to_owned()),
       )?)
       .map_err(|_| Error::JsonConvertError("Could not read repository index file!".to_owned()))?,
