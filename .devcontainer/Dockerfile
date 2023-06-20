@@ -9,6 +9,7 @@ RUN fdroid init
 
 # API Setup
 EXPOSE 80
+ENV RM_PORT=80
 ENV RUST_LOG=debug
 ENV RM_IP=0.0.0.0
 ENV ANDROID_HOME=/usr/lib/android-sdk
