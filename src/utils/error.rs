@@ -27,7 +27,7 @@ impl error::Error for Error {
     match self {
       Error::FileError(err) => Some(err),
       Error::YAMLConvertError(err) => Some(err),
-      Error::JsonConvertError(err) => None,
+      Error::JsonConvertError(_err) => None,
     }
   }
 }

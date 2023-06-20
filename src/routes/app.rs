@@ -13,7 +13,5 @@ use crate::repository::Repository;
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
     let apps = repo.get_apps()?;
 
-    todo!("Fix this route");
-
     Ok(web::Json(apps))
 }

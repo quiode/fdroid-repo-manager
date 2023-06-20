@@ -1,3 +1,5 @@
+use std::{fs::File, io::Read};
+
 use serde::Serialize;
 
 use crate::utils::error::{Error, Result};
@@ -39,7 +41,7 @@ impl App {
       let mut categories = vec![];
 
       // get all categories (are saved in a map)
-      for category in app.get("categories")?.as_object()?.values() {
+      for category in app.get("categories")?.as_array()? {
         categories.push(category.as_str()?.to_string());
       }
 
@@ -48,7 +50,7 @@ impl App {
       let package = packages.get(&package_name)?;
 
       // map all package fields
-      for package_entry in package.as_object()?.values() {
+      for package_entry in package.as_array()? {
         packages_vec.push(Package::from_json(package_entry)?);
       }
 
@@ -74,16 +76,15 @@ pub struct Package {
   apk_name: String,
   hash: String,
   hash_type: String,
-  max_sdk_version: u32,
-  min_sdk_version: u32,
+  max_sdk_version: Option<u32>,
+  min_sdk_version: Option<u32>,
   nativecode: Vec<String>,
   package_name: String,
   sig: String,
   signer: String,
   size: u64,
-  target_sdk_version: u32,
+  target_sdk_version: Option<u32>,
   uses_permission: Vec<(String, Option<u32>)>,
-  uses_permission_sdk_23: Vec<(String, Option<u32>)>,
   version_code: u64,
   version_name: String,
 }
@@ -97,12 +98,22 @@ impl Package {
     let apk_name = value.get("apkName")?.as_str()?.to_owned();
     let hash = value.get("hash")?.as_str()?.to_owned();
     let hash_type = value.get("hashType")?.as_str()?.to_owned();
-    let max_sdk_version: u32 = value.get("maxSdkVersion")?.as_u64()?.try_into().ok()?;
-    let min_sdk_version: u32 = value.get("minSdkVersion")?.as_i64()?.try_into().ok()?;
+    let max_sdk_version = value
+      .get("maxSdkVersion")
+      .map(|val| val.as_u64())
+      .flatten()
+      .map(|val| val.try_into().ok())
+      .flatten();
+    let min_sdk_version = value
+      .get("minSdkVersion")
+      .map(|val| val.as_u64())
+      .flatten()
+      .map(|val| val.try_into().ok())
+      .flatten();
 
     let mut nativecode = vec![];
 
-    for nativecode_entry in value.get("nativecode")?.as_object()?.values() {
+    for nativecode_entry in value.get("nativecode")?.as_array()? {
       nativecode.push(nativecode_entry.as_str()?.to_owned());
     }
 
@@ -110,28 +121,26 @@ impl Package {
     let sig = value.get("sig")?.as_str()?.to_owned();
     let signer = value.get("signer")?.as_str()?.to_owned();
     let size = value.get("size")?.as_u64()?;
-    let target_sdk_version: u32 = value.get("targetSdkVersion")?.as_u64()?.try_into().ok()?;
+    let target_sdk_version = value
+      .get("targetSdkVersion")
+      .map(|val| val.as_u64())
+      .flatten()
+      .map(|val| val.try_into().ok())
+      .flatten();
 
-    let mut uses_permission: Vec<(String, Option<u32>)> = vec![];
+    let mut uses_permission = vec![];
 
-    for uses_permission_entry in value.get("uses-permission")?.as_object()?.values() {
+    for uses_permission_entry in value
+      .get("uses-permission")
+      .unwrap_or(&serde_json::Value::Null)
+      .as_array()
+      .unwrap_or(&vec![])
+    {
       uses_permission.push((
-        uses_permission_entry.get("0")?.as_str()?.to_owned(),
+        uses_permission_entry.get(0)?.as_str()?.to_owned(),
         uses_permission_entry
-          .get("1")?
+          .get(1)?
           .as_i64()
-          .and_then(|val| val.try_into().ok()),
-      ));
-    }
-
-    let mut uses_permission_sdk_23: Vec<(String, Option<u32>)> = vec![];
-
-    for uses_permission_entry in value.get("uses-permission-sdk-23")?.as_object()?.values() {
-      uses_permission_sdk_23.push((
-        uses_permission_entry.get("0")?.as_str()?.to_owned(),
-        uses_permission_entry
-          .get("1")?
-          .as_u64()
           .and_then(|val| val.try_into().ok()),
       ));
     }
@@ -153,7 +162,6 @@ impl Package {
       size,
       target_sdk_version,
       uses_permission,
-      uses_permission_sdk_23,
       version_code,
       version_name,
     })
@@ -165,14 +173,23 @@ impl Repository {
   ///
   /// Returns an error if the json file can't be mapped correctely
   pub fn get_apps(&self) -> Result<Vec<App>> {
+    let index_file = self.path.join("repo/index-v1.json");
+
+    if !index_file.exists() {
+      // if no index file exists, no apps exist
+      return Ok(vec![]);
+    }
+
+    let mut file = File::open(index_file)?;
+    let mut file_content = String::new();
+    file.read_to_string(&mut file_content)?;
+
     App::from_json(
-      &serde_json::from_str(self.path.join("/repo/index-v1.json").to_str().ok_or(
-        Error::JsonConvertError("Could not read repository index file!".to_owned()),
-      )?)
-      .map_err(|_| Error::JsonConvertError("Could not read repository index file!".to_owned()))?,
+      &serde_json::from_str(&file_content)
+        .map_err(|_| Error::JsonConvertError("Could not read repository index file!".to_owned()))?,
     )
     .ok_or(Error::JsonConvertError(
-      "Could not read repository index file!".to_owned(),
+      "Could not map repository index file!".to_owned(),
     ))
   }
 }
