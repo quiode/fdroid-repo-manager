@@ -1,7 +1,6 @@
+use actix_web::{http::StatusCode, ResponseError};
 use core::fmt;
 use std::{error, io};
-
-use actix_web::{http::StatusCode, ResponseError};
 
 pub type Result<T> = std::result::Result<T, Error>;
 

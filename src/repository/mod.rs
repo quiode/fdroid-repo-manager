@@ -35,6 +35,11 @@ impl Repository {
         }
     }
 
+    // returns the path to the app repository
+    pub fn repo_path(&self) -> PathBuf {
+        self.path.join("repo")
+    }
+
     /// Initializes a new repository by calling fdroid init
     fn initialize(&self) {
         info!("Initializing a new fdroid repository!");

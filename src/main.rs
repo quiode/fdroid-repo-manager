@@ -11,7 +11,7 @@ use log::{debug, info};
 use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
-use crate::routes::app::get_apps;
+use crate::routes::app::{get_apps, upload_app};
 use crate::routes::config::{get_config, post_config};
 use crate::utils::app_config::{AppConfig, WrappedValue};
 
@@ -72,7 +72,12 @@ async fn main() -> std::io::Result<()> {
           .guard(AuthGuard),
       )
       // app services for manipulating apps
-      .service(web::scope("/apps").service(get_apps).guard(AuthGuard))
+      .service(
+        web::scope("/apps")
+          .service(get_apps)
+          .service(upload_app)
+          .guard(AuthGuard),
+      )
   })
   .bind((
     app_config_clone.ip.value().clone(),

@@ -1,5 +1,9 @@
-use std::{fs::File, io::Read};
+use std::{
+  fs::File,
+  io::{self, Read},
+};
 
+use actix_multipart::form::tempfile::TempFile;
 use serde::Serialize;
 
 use crate::utils::error::{Error, Result};
@@ -173,7 +177,7 @@ impl Repository {
   ///
   /// Returns an error if the json file can't be mapped correctely
   pub fn get_apps(&self) -> Result<Vec<App>> {
-    let index_file = self.path.join("repo/index-v1.json");
+    let index_file = self.repo_path().join("index-v1.json");
 
     if !index_file.exists() {
       // if no index file exists, no apps exist
@@ -191,5 +195,19 @@ impl Repository {
     .ok_or(Error::JsonConvertError(
       "Could not map repository index file!".to_owned(),
     ))
+  }
+
+  /// Uploads a file directly to the app repository
+  pub fn upload_app(&self, file: TempFile) -> Result<()> {
+    // save file
+    let repo_path = self.repo_path();
+    file
+      .file
+      .persist(repo_path)
+      .map_err(io::Error::from)
+      .map_err(Error::from)?;
+
+    // update meta data
+    self.update()
   }
 }
