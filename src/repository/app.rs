@@ -1,9 +1,11 @@
 use std::{
-  fs::File,
+  fs::{self, File},
   io::{self, Read},
+  path::PathBuf,
 };
 
 use actix_multipart::form::tempfile::TempFile;
+use log::warn;
 use serde::Serialize;
 
 use crate::utils::error::{Error, Result};
@@ -200,14 +202,72 @@ impl Repository {
   /// Uploads a file directly to the app repository
   pub fn upload_app(&self, file: TempFile) -> Result<()> {
     // save file
-    let repo_path = self.repo_path();
+    let new_file_path = self.repo_path().join(
+      file
+        .file_name
+        .as_ref()
+        .clone()
+        .ok_or(Error::UserError("File has no name!".to_owned()))?,
+    );
+
+    // if file already exists, warn
+    if new_file_path.clone().exists() {
+      warn!(
+        "File already exists, overriding existing file: {:?}",
+        new_file_path
+      );
+    }
+
+    self.persist_temp_file(file, new_file_path.clone())?;
+
+    // update meta data
+    let update_result = self.update();
+
+    // cleanup if error
+    if update_result.is_err() {
+      if new_file_path.exists() && new_file_path.is_file() {
+        fs::remove_file(new_file_path).map_err(Error::from)?;
+      }
+    }
+
+    Ok(())
+  }
+
+  /// Saves a temporary file to a final location
+  ///
+  /// Needed because file.persist() throws error if the destination directory is mounted inside a docker container
+  fn persist_temp_file(&self, file: TempFile, path: PathBuf) -> Result<File> {
+    // create temporary directory
+    let temp_dir_path = PathBuf::from("/tmp/files");
+    if !temp_dir_path.exists() {
+      fs::create_dir_all(temp_dir_path.clone()).map_err(Error::from)?;
+    }
+
+    // save file to temporary directory
+    let persistent_temp_file_path = temp_dir_path.join(
+      path
+        .file_name()
+        .ok_or(Error::CustomError("File Name not provided!".to_owned()))?,
+    );
+
+    // persist file to temporary location
     file
       .file
-      .persist(repo_path)
+      .persist(persistent_temp_file_path.clone())
       .map_err(io::Error::from)
       .map_err(Error::from)?;
 
-    // update meta data
-    self.update()
+    // copy file
+    let file_copy_result = fs::copy(persistent_temp_file_path.clone(), path.clone())
+      .map_err(Error::from)
+      .map(|_| ());
+
+    // remove old file
+    fs::remove_file(persistent_temp_file_path).map_err(Error::from)?;
+
+    // if copy operation was unsucessful, return here
+    file_copy_result?;
+
+    File::open(path).map_err(Error::from)
   }
 }

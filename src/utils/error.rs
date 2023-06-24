@@ -5,10 +5,15 @@ use std::{error, io};
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum Error {
   FileError(io::Error),
   YAMLConvertError(serde_yaml::Error),
   JsonConvertError(String),
+  /// Custom Error message
+  CustomError(String),
+  /// User Error
+  UserError(String),
 }
 
 impl fmt::Display for Error {
@@ -17,6 +22,8 @@ impl fmt::Display for Error {
       Error::FileError(err) => write!(f, "Error while working with a file: {err:#?}"),
       Error::YAMLConvertError(err) => write!(f, "Error while converting a yml file: {err:#?}"),
       Error::JsonConvertError(err) => write!(f, "Error while converting a json file: {err}"),
+      Error::CustomError(err) => write!(f, "{err}"),
+      Error::UserError(err) => write!(f, "{err}"),
     }
   }
 }
@@ -26,7 +33,9 @@ impl error::Error for Error {
     match self {
       Error::FileError(err) => Some(err),
       Error::YAMLConvertError(err) => Some(err),
-      Error::JsonConvertError(_err) => None,
+      Error::JsonConvertError(_) => None,
+      Error::CustomError(_) => None,
+      Error::UserError(_) => None,
     }
   }
 }
@@ -49,6 +58,8 @@ impl ResponseError for Error {
       Error::FileError(err) => err.status_code(),
       Error::YAMLConvertError(_) => StatusCode::INTERNAL_SERVER_ERROR,
       Error::JsonConvertError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+      Error::CustomError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+      Error::UserError(_) => StatusCode::BAD_REQUEST,
     }
   }
 }

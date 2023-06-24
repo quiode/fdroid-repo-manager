@@ -23,17 +23,16 @@ async fn upload_app(
   repo: web::Data<Repository>,
   form: MultipartForm<FileUploadForm>,
 ) -> Result<impl Responder> {
-  debug!(
-    "\"Uploading a new app: {}\"",
-    form.0.app.file_name.clone().unwrap_or("NONE".to_owned())
-  );
+  let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
+  debug!("Uploading a new app: \"{}\"...", file_name);
 
   repo.upload_app(form.0.app)?;
 
+  debug!("Finished uploading app: \"{}\"!", file_name);
   Ok("Ok")
 }
 
 #[derive(MultipartForm)]
-struct FileUploadForm {
+pub struct FileUploadForm {
   app: TempFile,
 }

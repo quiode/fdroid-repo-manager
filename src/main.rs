@@ -4,6 +4,7 @@ mod routes;
 mod utils;
 
 use actix_files as fs;
+use actix_multipart::form::MultipartFormConfig;
 use actix_web::middleware;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use env_logger::Env;
@@ -11,6 +12,7 @@ use log::{debug, info};
 use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
+
 use crate::routes::app::{get_apps, upload_app};
 use crate::routes::config::{get_config, post_config};
 use crate::utils::app_config::{AppConfig, WrappedValue};
@@ -42,6 +44,12 @@ async fn main() -> std::io::Result<()> {
       .app_data(web::Data::new(app_config.clone()))
       // provide fdroid repository
       .app_data(fdroid_repository.clone())
+      // multipart config
+      .app_data(
+        MultipartFormConfig::default()
+          .to_owned()
+          .total_limit(*app_config.max_payload_size.value()),
+      )
       // normalize routes (add / to all routes)
       .wrap(middleware::NormalizePath::new(
         middleware::TrailingSlash::Trim,

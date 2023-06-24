@@ -1,6 +1,7 @@
-target
+target/
 Dockerfile
-.git
+.git/
 ./gitignore
-debug
-.vscode
+debug/
+.vscode/
+developement/
