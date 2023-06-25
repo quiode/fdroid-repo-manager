@@ -13,7 +13,7 @@ use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
 
-use crate::routes::app::{get_apps, upload_app};
+use crate::routes::app::{get_apps, upload_app, delete_app};
 use crate::routes::config::{get_config, post_config};
 use crate::utils::app_config::{AppConfig, WrappedValue};
 
@@ -84,6 +84,7 @@ async fn main() -> std::io::Result<()> {
         web::scope("/apps")
           .service(get_apps)
           .service(upload_app)
+          .service(delete_app)
           .guard(AuthGuard),
       )
   })

@@ -5,7 +5,7 @@ use std::{
 };
 
 use actix_multipart::form::tempfile::TempFile;
-use log::warn;
+use log::{warn, info};
 use serde::Serialize;
 
 use crate::utils::error::{Error, Result};
@@ -231,6 +231,29 @@ impl Repository {
     }
 
     Ok(())
+  }
+
+  /// Deletes an apk (if it exists)
+  pub fn delete_app(&self, apk_name: &str) -> Result<()> {
+    info!("Deleting \"{}\"", apk_name);
+    let file_path = self.repo_path().join(apk_name);
+
+    // check if file exists
+    if file_path.exists() {
+      // check if file as really a file
+      if file_path.is_file() {
+        // delete the file
+        fs::remove_file(file_path).map_err(Error::from)?;
+
+        // update metadata
+        self.update()
+      } else {
+        Err(Error::UserError("Provided file is not a file!".to_owned()))
+      }
+    } else {
+      warn!("Trying to delete \"{}\" but file does not exist!", apk_name);
+      Ok(())
+    }
   }
 
   /// Saves a temporary file to a final location

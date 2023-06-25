@@ -1,12 +1,13 @@
 //! Route used to edit apps and their metadata
 
 use actix_multipart::form::{tempfile::TempFile, MultipartForm};
-use actix_web::{get, post, web, Responder, Result};
+use actix_web::{delete, get, post, web, Responder, Result};
 use log::debug;
 
 use crate::repository::Repository;
 
-// TODO: add apps, get apps, update app metadata
+// TODO: delete app
+// TODO: update app metadata
 // TODO: cleanup: "fdroid rewritemeta"
 // TODO: "clean" (delete all metadatas and apk's)
 // TODO: categories management
@@ -30,6 +31,16 @@ async fn upload_app(
 
   debug!("Finished uploading app: \"{}\"!", file_name);
   Ok("Ok")
+}
+
+#[delete("{apk_name}")]
+async fn delete_app(
+  path: web::Path<String>,
+  repo: web::Data<Repository>,
+) -> Result<impl Responder> {
+    repo.delete_app(&path)?;
+
+    Ok("Ok")
 }
 
 #[derive(MultipartForm)]
