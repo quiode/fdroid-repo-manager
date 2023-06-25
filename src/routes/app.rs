@@ -6,7 +6,6 @@ use log::debug;
 
 use crate::repository::Repository;
 
-// TODO: delete app
 // TODO: update app metadata
 // TODO: cleanup: "fdroid rewritemeta"
 // TODO: "clean" (delete all metadatas and apk's)
