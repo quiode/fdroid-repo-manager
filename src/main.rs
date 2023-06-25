@@ -13,7 +13,7 @@ use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
 
-use crate::routes::app::{get_apps, upload_app, delete_app};
+use crate::routes::app::{delete_app, get_apps, upload_app};
 use crate::routes::config::{get_config, post_config};
 use crate::utils::app_config::{AppConfig, WrappedValue};
 
@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
       // multipart config
       .app_data(
         MultipartFormConfig::default()
-          .to_owned()
+          
           .total_limit(*app_config.max_payload_size.value()),
       )
       // normalize routes (add / to all routes)
@@ -89,8 +89,8 @@ async fn main() -> std::io::Result<()> {
       )
   })
   .bind((
-    app_config_clone.ip.value().clone(),
-    app_config_clone.port.value().clone(),
+    *app_config_clone.ip.value(),
+    *app_config_clone.port.value(),
   ))?
   .run()
   .await

@@ -109,7 +109,7 @@ impl Repository {
     fn get_config(&self) -> Result<ConfigFile> {
         let yml_string = fs::read_to_string(self.get_config_path()).map_err(Error::from)?;
 
-        return serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from);
+        serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from)
     }
 
     /// writes to the actual config file

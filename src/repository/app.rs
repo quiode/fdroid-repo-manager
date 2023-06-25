@@ -5,7 +5,7 @@ use std::{
 };
 
 use actix_multipart::form::tempfile::TempFile;
-use log::{warn, info};
+use log::{info, warn};
 use serde::Serialize;
 
 use crate::utils::error::{Error, Result};
@@ -106,16 +106,12 @@ impl Package {
     let hash_type = value.get("hashType")?.as_str()?.to_owned();
     let max_sdk_version = value
       .get("maxSdkVersion")
-      .map(|val| val.as_u64())
-      .flatten()
-      .map(|val| val.try_into().ok())
-      .flatten();
+      .and_then(|val| val.as_u64())
+      .and_then(|val| val.try_into().ok());
     let min_sdk_version = value
       .get("minSdkVersion")
-      .map(|val| val.as_u64())
-      .flatten()
-      .map(|val| val.try_into().ok())
-      .flatten();
+      .and_then(|val| val.as_u64())
+      .and_then(|val| val.try_into().ok());
 
     let mut nativecode = vec![];
 
@@ -129,10 +125,8 @@ impl Package {
     let size = value.get("size")?.as_u64()?;
     let target_sdk_version = value
       .get("targetSdkVersion")
-      .map(|val| val.as_u64())
-      .flatten()
-      .map(|val| val.try_into().ok())
-      .flatten();
+      .and_then(|val| val.as_u64())
+      .and_then(|val| val.try_into().ok());
 
     let mut uses_permission = vec![];
 
@@ -192,9 +186,9 @@ impl Repository {
 
     App::from_json(
       &serde_json::from_str(&file_content)
-        .map_err(|_| Error::JsonConvertError("Could not read repository index file!".to_owned()))?,
+        .map_err(|_| Error::JsonConvert("Could not read repository index file!".to_owned()))?,
     )
-    .ok_or(Error::JsonConvertError(
+    .ok_or(Error::JsonConvert(
       "Could not map repository index file!".to_owned(),
     ))
   }
@@ -206,12 +200,11 @@ impl Repository {
       file
         .file_name
         .as_ref()
-        .clone()
-        .ok_or(Error::UserError("File has no name!".to_owned()))?,
+        .ok_or(Error::User("File has no name!".to_owned()))?,
     );
 
     // if file already exists, warn
-    if new_file_path.clone().exists() {
+    if new_file_path.exists() {
       warn!(
         "File already exists, overriding existing file: {:?}",
         new_file_path
@@ -224,10 +217,8 @@ impl Repository {
     let update_result = self.update();
 
     // cleanup if error
-    if update_result.is_err() {
-      if new_file_path.exists() && new_file_path.is_file() {
-        fs::remove_file(new_file_path).map_err(Error::from)?;
-      }
+    if update_result.is_err() && new_file_path.exists() && new_file_path.is_file() {
+      fs::remove_file(new_file_path).map_err(Error::from)?;
     }
 
     Ok(())
@@ -248,7 +239,7 @@ impl Repository {
         // update metadata
         self.update()
       } else {
-        Err(Error::UserError("Provided file is not a file!".to_owned()))
+        Err(Error::User("Provided file is not a file!".to_owned()))
       }
     } else {
       warn!("Trying to delete \"{}\" but file does not exist!", apk_name);
@@ -270,7 +261,7 @@ impl Repository {
     let persistent_temp_file_path = temp_dir_path.join(
       path
         .file_name()
-        .ok_or(Error::CustomError("File Name not provided!".to_owned()))?,
+        .ok_or(Error::Custom("File Name not provided!".to_owned()))?,
     );
 
     // persist file to temporary location

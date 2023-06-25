@@ -26,12 +26,12 @@ impl Repository {
 
     // check if config.yml exists
     if repository.get_config_path().exists() {
-      return repository;
+      repository
     } else {
       // initialize directory
       repository.initialize();
 
-      return repository;
+      repository
     }
   }
 
@@ -64,8 +64,7 @@ impl Repository {
       .current_dir(&self.path)
       .spawn()
       .ok()
-      .map(|mut process| process.wait().ok())
-      .flatten();
+      .and_then(|mut process| process.wait().ok());
 
     let error_message = format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
 
@@ -73,6 +72,6 @@ impl Repository {
       warn!("{}", error_message);
     }
 
-    run_result.map(|_| ()).ok_or(Error::CustomError(error_message))
+    run_result.map(|_| ()).ok_or(Error::Custom(error_message))
   }
 }
