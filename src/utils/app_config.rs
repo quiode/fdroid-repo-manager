@@ -2,6 +2,7 @@ use std::{env, net::Ipv4Addr, path::PathBuf};
 
 /**
  * Trait that descibes a struct that wraps a value.
+ * TODO: Use Deref to access wrapped value?
  */
 pub trait WrappedValue<T> {
   /**
