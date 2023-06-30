@@ -1,7 +1,6 @@
-use std::any::Any;
 use std::{fs::File, io::Read};
 
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 
 use crate::utils::error::{Error, Result};
 
