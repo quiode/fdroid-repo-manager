@@ -5,6 +5,7 @@ use log::{debug, info, warn};
 use crate::utils::error::{Error, Result};
 
 pub mod app;
+pub mod app_metadata;
 pub mod config;
 
 #[derive(Debug, Clone)]
@@ -19,7 +20,17 @@ impl Repository {
     self.path.join("config.yml")
   }
 
+  /// get the path of the metadata directory
+  fn get_metadata_path(&self) -> PathBuf {
+    self.path.join("metadata")
+  }
+
   // Create a new repository with the provided path
+  // returns the path to the app repository
+  pub fn repo_path(&self) -> PathBuf {
+    self.path.join("repo")
+  }
+
   /// Runs fdroid init if config.yml misses
   pub fn new(path: PathBuf) -> Self {
     let repository = Self { path };
@@ -33,11 +44,6 @@ impl Repository {
 
       repository
     }
-  }
-
-  // returns the path to the app repository
-  pub fn repo_path(&self) -> PathBuf {
-    self.path.join("repo")
   }
 
   /// Initializes a new repository by calling fdroid init
@@ -66,7 +72,8 @@ impl Repository {
       .ok()
       .and_then(|mut process| process.wait().ok());
 
-    let error_message = format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
+    let error_message =
+      format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
 
     if run_result.is_none() {
       warn!("{}", error_message);

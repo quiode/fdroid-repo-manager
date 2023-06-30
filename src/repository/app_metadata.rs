@@ -1,6 +1,7 @@
-use std::{fmt::format, fs::File, io::Read};
+use std::any::Any;
+use std::{fs::File, io::Read};
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 
 use crate::utils::error::{Error, Result};
 
@@ -9,7 +10,7 @@ use super::Repository;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct AppMetadata {
-  Categories: Option<Categories>,
+  Categories: Option<Vec<Categories>>,
   AuthorName: Option<String>,
   AuthorEmail: Option<String>,
   AuthorWebSite: Option<String>,
@@ -90,6 +91,7 @@ pub struct Builds {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(untagged)]
 pub enum Categories {
   Connectivity,
   Development,
@@ -111,6 +113,7 @@ pub enum Categories {
   Theming,
   Time,
   Writing,
+  Custom(String),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

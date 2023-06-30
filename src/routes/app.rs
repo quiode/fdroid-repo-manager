@@ -1,7 +1,11 @@
 //! Route used to edit apps and their metadata
 
 use actix_multipart::form::{tempfile::TempFile, MultipartForm};
-use actix_web::{delete, get, post, web, Responder, Result};
+use actix_web::{
+  delete, get, post,
+  web::{self, Json},
+  Responder, Result,
+};
 use log::debug;
 
 use crate::repository::Repository;
@@ -15,7 +19,7 @@ use crate::repository::Repository;
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
   let apps = repo.get_apps()?;
 
-  Ok(web::Json(apps))
+  Ok(Json(apps))
 }
 
 #[post("")]
@@ -37,9 +41,17 @@ async fn delete_app(
   path: web::Path<String>,
   repo: web::Data<Repository>,
 ) -> Result<impl Responder> {
-    repo.delete_app(&path)?;
+  repo.delete_app(&path)?;
 
-    Ok("Ok")
+  Ok("Ok")
+}
+
+#[get("/metadata/{package_name}")]
+async fn get_metadata(
+  path: web::Path<String>,
+  repo: web::Data<Repository>,
+) -> Result<impl Responder> {
+  Ok(Json(repo.get_metadata(&path)?))
 }
 
 #[derive(MultipartForm)]

@@ -6,14 +6,14 @@ use crate::repository::{config::PublicConfig, Repository};
 
 // TODO: update general info, backup keystore (get keystore and password), update store picture
 #[get("")]
-async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
+pub(crate) async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
   let config = repo.get_public_config()?;
 
   Ok(web::Json(config))
 }
 
 #[post("")]
-async fn post_config(
+pub(crate) async fn post_config(
   repo: web::Data<Repository>,
   public_config: web::Json<PublicConfig>,
 ) -> Result<impl Responder> {

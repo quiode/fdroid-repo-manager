@@ -1,7 +1,6 @@
 target/
 Dockerfile
 .git/
-./gitignore
-debug/
+.gitignore
 .vscode/
 developement/

@@ -53,7 +53,7 @@ impl From<serde_yaml::Error> for Error {
 }
 
 impl ResponseError for Error {
-  fn status_code(&self) -> actix_web::http::StatusCode {
+  fn status_code(&self) -> StatusCode {
     match self {
       Error::File(err) => err.status_code(),
       Error::YAMLConvert(_) => StatusCode::INTERNAL_SERVER_ERROR,

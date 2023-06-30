@@ -1,21 +1,21 @@
-mod guards;
-mod repository;
-mod routes;
-mod utils;
-
 use actix_files as fs;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::middleware;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use env_logger::Env;
 use log::{debug, info};
+
 use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
-
-use crate::routes::app::{delete_app, get_apps, upload_app};
+use crate::routes::app::*;
 use crate::routes::config::{get_config, post_config};
 use crate::utils::app_config::{AppConfig, WrappedValue};
+
+mod guards;
+mod repository;
+mod routes;
+mod utils;
 
 #[get("/health")]
 async fn health() -> impl Responder {
@@ -45,11 +45,7 @@ async fn main() -> std::io::Result<()> {
       // provide fdroid repository
       .app_data(fdroid_repository.clone())
       // multipart config
-      .app_data(
-        MultipartFormConfig::default()
-          
-          .total_limit(*app_config.max_payload_size.value()),
-      )
+      .app_data(MultipartFormConfig::default().total_limit(*app_config.max_payload_size.value()))
       // normalize routes (add / to all routes)
       .wrap(middleware::NormalizePath::new(
         middleware::TrailingSlash::Trim,
@@ -85,13 +81,11 @@ async fn main() -> std::io::Result<()> {
           .service(get_apps)
           .service(upload_app)
           .service(delete_app)
+          .service(get_metadata)
           .guard(AuthGuard),
       )
   })
-  .bind((
-    *app_config_clone.ip.value(),
-    *app_config_clone.port.value(),
-  ))?
+  .bind((*app_config_clone.ip.value(), *app_config_clone.port.value()))?
   .run()
   .await
 }
