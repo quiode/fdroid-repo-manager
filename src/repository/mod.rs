@@ -1,4 +1,4 @@
-use std::{path::PathBuf, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
 use log::{debug, info, warn};
 
@@ -27,7 +27,7 @@ impl Repository {
 
   // Create a new repository with the provided path
   // returns the path to the app repository
-  pub fn repo_path(&self) -> PathBuf {
+  pub fn get_repo_path(&self) -> PathBuf {
     self.path.join("repo")
   }
 
@@ -80,5 +80,23 @@ impl Repository {
     }
 
     run_result.map(|_| ()).ok_or(Error::Custom(error_message))
+  }
+
+  /// Deletes all apps and metadata (but keeps everything else)
+  pub fn clear(&self) -> Result<()> {
+    warn!("Clearing the repository!");
+
+    // Delete all apps
+    fs::remove_dir_all(self.get_repo_path()).map_err(Error::from)?;
+    // Create directory again
+    fs::create_dir(self.get_repo_path()).map_err(Error::from)?;
+
+    // Delete all metadata files
+    fs::remove_dir_all(self.get_metadata_path()).map_err(Error::from)?;
+    // Create metadata directory
+    fs::create_dir(self.get_metadata_path()).map_err(Error::from)?;
+
+    // update index files etc
+    self.update()
   }
 }

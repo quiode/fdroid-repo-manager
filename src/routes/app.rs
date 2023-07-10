@@ -12,7 +12,6 @@ use crate::repository::Repository;
 
 // TODO: update app metadata
 // TODO: cleanup: "fdroid rewritemeta"
-// TODO: "clean" (delete all metadatas and apk's)
 // TODO: categories management
 // TODO: sign apks
 #[get("")]
@@ -52,6 +51,14 @@ async fn get_metadata(
   repo: web::Data<Repository>,
 ) -> Result<impl Responder> {
   Ok(Json(repo.get_metadata(&path)?))
+}
+
+/// Deletes all metadata and apk's
+#[delete("")]
+async fn delete_all(repo: web::Data<Repository>) -> Result<impl Responder> {
+  repo.clear()?;
+
+  Ok("Ok")
 }
 
 #[derive(MultipartForm)]
