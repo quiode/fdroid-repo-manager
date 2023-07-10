@@ -1,9 +1,18 @@
 version: '3.9'
 services:
-  app:
+  watch:
     build: .
     volumes:
       - ../:/app
       - ./fdroid:/fdroid
+    ports:
+      - "8080:80"
+
+  manual:
+    build: .
+    volumes:
+      - ../:/app
+      - ./fdroid:/fdroid
+    command: "sh"
     ports:
       - "8080:80"

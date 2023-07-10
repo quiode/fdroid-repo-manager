@@ -173,7 +173,7 @@ impl Repository {
   ///
   /// Returns an error if the json file can't be mapped correctely
   pub fn get_apps(&self) -> Result<Vec<App>> {
-    let index_file = self.repo_path().join("index-v1.json");
+    let index_file = self.get_repo_path().join("index-v1.json");
 
     if !index_file.exists() {
       // if no index file exists, no apps exist
@@ -196,7 +196,7 @@ impl Repository {
   /// Uploads a file directly to the app repository
   pub fn upload_app(&self, file: TempFile) -> Result<()> {
     // save file
-    let new_file_path = self.repo_path().join(
+    let new_file_path = self.get_repo_path().join(
       file
         .file_name
         .as_ref()
@@ -227,7 +227,7 @@ impl Repository {
   /// Deletes an apk (if it exists)
   pub fn delete_app(&self, apk_name: &str) -> Result<()> {
     info!("Deleting \"{}\"", apk_name);
-    let file_path = self.repo_path().join(apk_name);
+    let file_path = self.get_repo_path().join(apk_name);
 
     // check if file exists
     if file_path.exists() {

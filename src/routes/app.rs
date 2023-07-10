@@ -54,6 +54,14 @@ async fn get_metadata(
   Ok(Json(repo.get_metadata(&path)?))
 }
 
+/// Deletes all metadata and apk's
+#[delete("/all")]
+async fn delete_all(repo: web::Data<Repository>) -> Result<impl Responder> {
+  repo.clear()?;
+
+  Ok("Ok")
+}
+
 #[derive(MultipartForm)]
 pub struct FileUploadForm {
   app: TempFile,
