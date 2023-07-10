@@ -54,7 +54,7 @@ async fn get_metadata(
 }
 
 /// Deletes all metadata and apk's
-#[delete("/all")]
+#[delete("")]
 async fn delete_all(repo: web::Data<Repository>) -> Result<impl Responder> {
   repo.clear()?;
 
