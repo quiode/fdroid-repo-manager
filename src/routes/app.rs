@@ -11,7 +11,6 @@ use log::debug;
 use crate::repository::Repository;
 
 // TODO: update app metadata
-// TODO: categories management
 // TODO: sign apks
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
