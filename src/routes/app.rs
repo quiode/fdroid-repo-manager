@@ -2,15 +2,15 @@
 
 use actix_multipart::form::{tempfile::TempFile, MultipartForm};
 use actix_web::{
-  delete, get, patch, post,
+  delete, get, post, put,
   web::{self, Json},
   Responder, Result,
 };
 use log::debug;
 
+use crate::repository::app_metadata::AppMetadata;
 use crate::repository::Repository;
 
-// TODO: update app metadata
 // TODO: sign apks
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
@@ -30,7 +30,7 @@ async fn upload_app(
   repo.upload_app(form.0.app)?;
 
   debug!("Finished uploading app: \"{}\"!", file_name);
-  Ok("Ok")
+  Ok("")
 }
 
 #[delete("{apk_name}")]
@@ -40,9 +40,10 @@ async fn delete_app(
 ) -> Result<impl Responder> {
   repo.delete_app(&path)?;
 
-  Ok("Ok")
+  Ok("")
 }
 
+/// Get the metadata for a package
 #[get("/metadata/{package_name}")]
 async fn get_metadata(
   path: web::Path<String>,
@@ -51,20 +52,32 @@ async fn get_metadata(
   Ok(Json(repo.get_metadata(&path)?))
 }
 
+/// Update the metadata for a package
+#[put("/metadata/{package_name}")]
+async fn update_metadata(
+  path: web::Path<String>,
+  metadata: Json<AppMetadata>,
+  repo: web::Data<Repository>,
+) -> Result<impl Responder> {
+  repo.set_metadata(&path, &metadata.0)?;
+
+  Ok("")
+}
+
 /// Deletes all metadata and apk's
 #[delete("")]
 async fn delete_all(repo: web::Data<Repository>) -> Result<impl Responder> {
   repo.clear()?;
 
-  Ok("Ok")
+  Ok("")
 }
 
 /// Cleanup the repository
-#[patch("/cleanup")]
+#[put("/cleanup")]
 async fn cleanup_files(repo: web::Data<Repository>) -> Result<impl Responder> {
   repo.cleanup()?;
 
-  Ok("Ok")
+  Ok("")
 }
 
 #[derive(MultipartForm)]

@@ -1,5 +1,7 @@
-use std::{fs::File, io::Read};
+use std::path::PathBuf;
+use std::{fs, fs::File, io::Read};
 
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 use crate::utils::error::{Error, Result};
@@ -173,14 +175,20 @@ pub enum AndroidUpdate {
 }
 
 impl Repository {
+  /// gets the file path of an metadata file
+  fn get_meta_file_path(&self, package_name: &str) -> PathBuf {
+    self.get_metadata_path().join(format!("{package_name}.yml"))
+  }
+
   /// Readas the metadata from an app
   ///
   /// # Error
   /// - throws an error if the data does not exist
   /// - throws an error if the file can't be mapped
   pub fn get_metadata(&self, package_name: &str) -> Result<AppMetadata> {
+    debug!("Getting metadata for {package_name}!");
     // get metadata file path
-    let meta_file_path = self.get_metadata_path().join(format!("{package_name}.yml"));
+    let meta_file_path = self.get_meta_file_path(package_name);
 
     if meta_file_path.exists() && meta_file_path.is_file() {
       // get file
@@ -196,5 +204,19 @@ impl Repository {
     } else {
       Err(Error::User("Metadata file does not exist!".to_owned()))
     }
+  }
+
+  /// Sets the metadata for an app
+  pub fn set_metadata(&self, package_name: &str, metadata: &AppMetadata) -> Result<()> {
+    debug!("Writing new metadata for {package_name}!");
+    debug!("Metadata:\n{metadata:#?}");
+    // get metadata file path
+    let meta_file_path = self.get_meta_file_path(package_name);
+
+    // convert data to string
+    let file_content = serde_yaml::to_string(metadata).map_err(Error::from)?;
+
+    // write data to file
+    fs::write(meta_file_path, file_content).map_err(Error::from)
   }
 }
