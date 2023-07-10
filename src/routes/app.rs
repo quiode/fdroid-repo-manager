@@ -2,7 +2,7 @@
 
 use actix_multipart::form::{tempfile::TempFile, MultipartForm};
 use actix_web::{
-  delete, get, post,
+  delete, get, patch, post,
   web::{self, Json},
   Responder, Result,
 };
@@ -11,7 +11,6 @@ use log::debug;
 use crate::repository::Repository;
 
 // TODO: update app metadata
-// TODO: cleanup: "fdroid rewritemeta"
 // TODO: categories management
 // TODO: sign apks
 #[get("")]
@@ -57,6 +56,14 @@ async fn get_metadata(
 #[delete("")]
 async fn delete_all(repo: web::Data<Repository>) -> Result<impl Responder> {
   repo.clear()?;
+
+  Ok("Ok")
+}
+
+/// Cleanup the repository
+#[patch("/cleanup")]
+async fn cleanup_files(repo: web::Data<Repository>) -> Result<impl Responder> {
+  repo.cleanup()?;
 
   Ok("Ok")
 }

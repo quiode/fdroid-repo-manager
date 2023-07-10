@@ -99,4 +99,11 @@ impl Repository {
     // update index files etc
     self.update()
   }
+
+  /// Runs "fdroid rewritemeta"
+  pub fn cleanup(&self) -> Result<()> {
+    debug!("Cleaning up metadata files!");
+    let empty_string_vec: Vec<&str> = Vec::new();
+    self.run("rewritemeta", &empty_string_vec)
+  }
 }

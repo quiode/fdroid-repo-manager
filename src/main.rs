@@ -84,6 +84,7 @@ async fn main() -> std::io::Result<()> {
           .service(delete_app)
           .service(get_metadata)
           .service(delete_all)
+          .service(cleanup_files)
           .guard(AuthGuard),
       )
   })
