@@ -4,7 +4,9 @@ use actix_web::{get, post, web, Responder, Result};
 
 use crate::repository::{config::PublicConfig, Repository};
 
-// TODO: update general info, backup keystore (get keystore and password), update store picture
+// TODO: update general info
+// TODO: backup keystore (get keystore and password),
+// TODO: update store picture
 #[get("")]
 pub(crate) async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
   let config = repo.get_public_config()?;
