@@ -6,12 +6,11 @@ use actix_web::{
   web::{self, Json},
   Responder, Result,
 };
-use log::debug;
+use log::{debug, info};
 
 use crate::repository::app_metadata::AppMetadata;
 use crate::repository::Repository;
 
-// TODO: sign apks
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
   let apps = repo.get_apps()?;
@@ -25,7 +24,7 @@ async fn upload_app(
   form: MultipartForm<FileUploadForm>,
 ) -> Result<impl Responder> {
   let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
-  debug!("Uploading a new app: \"{}\"...", file_name);
+  info!("Uploading a new app: \"{}\"...", file_name);
 
   repo.upload_app(form.0.app)?;
 
@@ -34,13 +33,13 @@ async fn upload_app(
 }
 
 /// upload an apk and sign it
-#[post("")]
+#[post("/sign")]
 async fn sign_app(
   repo: web::Data<Repository>,
   form: MultipartForm<FileUploadForm>,
 ) -> Result<impl Responder> {
   let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
-  debug!("Uploading and Signing a new app: \"{}\"", file_name);
+  info!("Uploading and Signing a new app: \"{}\"", file_name);
 
   repo.sign_app(form.0.app)?;
 

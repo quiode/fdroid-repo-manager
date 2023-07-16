@@ -25,6 +25,25 @@ impl Repository {
     self.path.join("metadata")
   }
 
+  /// gets the path to the unsigned files
+  ///
+  /// also creates the directory if it does not already exist
+  fn get_unsigned_path(&self) -> Result<PathBuf> {
+    let path = self.path.join("unsigned");
+
+    // check if path is valid (could be invalid)
+    if path.exists() {
+      if path.is_dir() {
+        Ok(path)
+      } else {
+        Err(Error::Custom("unsigned directory is a file!".to_owned()))
+      }
+    } else {
+      fs::create_dir(path.clone()).map_err(Error::from)?;
+      Ok(path)
+    }
+  }
+
   // Create a new repository with the provided path
   // returns the path to the app repository
   pub fn get_repo_path(&self) -> PathBuf {
@@ -62,6 +81,14 @@ impl Repository {
     self.run("update", &vec!["-c"])
   }
 
+  /// Runs "fdroid publish"
+  fn publish(&self) -> Result<()> {
+    debug!("Running fdroid publish");
+
+    let empty_string_vec: Vec<&str> = Vec::new();
+    self.run("publish", &empty_string_vec)
+  }
+
   /// Runs an fdroid command with the specified arguments
   fn run(&self, command: &str, args: &Vec<&str>) -> Result<()> {
     let run_result = Command::new("fdroid")
@@ -69,8 +96,20 @@ impl Repository {
       .args(args)
       .current_dir(&self.path)
       .spawn()
+      .map_err(|err| {
+        debug!("Error spawning run command: {err:#?}");
+        err
+      })
       .ok()
-      .and_then(|mut process| process.wait().ok());
+      .and_then(|mut process| {
+        process
+          .wait()
+          .map_err(|err| {
+            debug!("Error while running process: {process:#?}");
+            err
+          })
+          .ok()
+      });
 
     let error_message =
       format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");

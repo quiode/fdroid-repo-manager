@@ -10,10 +10,11 @@ use super::error::{Error, Result};
 ///
 /// # Error
 /// Returns an error if the file does not exist or can't be parsed
-fn get_apk_info(apk_path: &PathBuf) -> Result<String> {
+pub fn get_apk_info(apk_path: &PathBuf) -> Result<String> {
   if apk_path.is_file() {
     // run aapt command
     let output = Command::new("aapt")
+      .arg("dump")
       .arg("badging")
       .arg(apk_path)
       .output()
@@ -26,7 +27,7 @@ fn get_apk_info(apk_path: &PathBuf) -> Result<String> {
 }
 
 /// gets the version code from an apk metadata string
-fn get_version_code(metadata: &str) -> Result<u32> {
+pub fn get_version_code(metadata: &str) -> Result<u32> {
   let regex = Regex::new(r"versionCode='(\d+)'").unwrap();
 
   // apply regext to string
@@ -44,7 +45,7 @@ fn get_version_code(metadata: &str) -> Result<u32> {
     .map_err(|_| Error::Custom("versionCode is not a valid number!".to_owned()))
 }
 /// gets the name from an apk metadata string
-fn get_name(metadata: &str) -> Result<String> {
+pub fn get_name(metadata: &str) -> Result<String> {
   let regex = Regex::new(r"name='((?:[[:alpha:]]|\.)+)'").unwrap();
 
   // apply regext to string
