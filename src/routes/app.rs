@@ -33,6 +33,20 @@ async fn upload_app(
   Ok("")
 }
 
+/// upload an apk and sign it
+#[post("")]
+async fn sign_app(
+  repo: web::Data<Repository>,
+  form: MultipartForm<FileUploadForm>,
+) -> Result<impl Responder> {
+  let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
+  debug!("Uploading and Signing a new app: \"{}\"", file_name);
+
+  repo.sign_app(form.0.app)?;
+
+  Ok("")
+}
+
 #[delete("{apk_name}")]
 async fn delete_app(
   path: web::Path<String>,

@@ -247,6 +247,16 @@ impl Repository {
     }
   }
 
+  /// Signs an apk and uploads it
+  /// 
+  /// - Uploads apk to unsigned folder
+  /// - parses apk metadata
+  /// - renames apk
+  /// - signs apk
+  pub fn sign_app(&self, file: TempFile) -> Result<()> {
+    todo!()
+  }
+
   /// Saves a temporary file to a final location
   ///
   /// Needed because file.persist() throws error if the destination directory is mounted inside a docker container
