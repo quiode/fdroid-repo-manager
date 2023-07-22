@@ -74,19 +74,19 @@ impl Repository {
       .expect("Failed to initialize the repository!");
   }
 
-  /// Runs "fdroid update -c"
+  /// Runs "fdroid update -c; fdroid update"
   fn update(&self) -> Result<()> {
-    debug!("Updating Repository (Running fdroid update -c)");
+    debug!("Updating Repository (Running fdroid update -c; fdroid update)");
 
-    self.run("update", &vec!["-c"])
+    self.run("update", &vec!["-c"])?;
+    self.run("update", &vec![])
   }
 
   /// Runs "fdroid publish"
   fn publish(&self) -> Result<()> {
     debug!("Running fdroid publish");
 
-    let empty_string_vec: Vec<&str> = Vec::new();
-    self.run("publish", &empty_string_vec)
+    self.run("publish", &vec![])
   }
 
   /// Runs an fdroid command with the specified arguments
@@ -142,7 +142,6 @@ impl Repository {
   /// Runs "fdroid rewritemeta"
   pub fn cleanup(&self) -> Result<()> {
     debug!("Cleaning up metadata files!");
-    let empty_string_vec: Vec<&str> = Vec::new();
-    self.run("rewritemeta", &empty_string_vec)
+    self.run("rewritemeta", &vec![])
   }
 }
