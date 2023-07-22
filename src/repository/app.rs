@@ -269,6 +269,13 @@ impl Repository {
       .join(format!("{}_{}.apk", apk_name, apk_version));
     self.persist_temp_file(file, file_path.clone())?;
 
+    // check if metadata exists
+    let metadata = self.get_metadata(&apk_name);
+    if metadata.is_err() {
+      warn!("No metadata for this package exists, creating empty metadata file!");
+      self.create_metadata(&apk_name)?;
+    }
+
     // run fdroid publish
     self.publish()?;
 
