@@ -209,13 +209,11 @@ impl Repository {
 
     if meta_file_path.exists() && meta_file_path.is_file() {
       // get file
-      let mut file = File::open(meta_file_path).map_err(Error::from)?;
+      let mut file = File::open(meta_file_path)?;
       // parse file content to a string
       let mut file_content = String::new();
       // map file to rust struct
-      file
-        .read_to_string(&mut file_content)
-        .map_err(Error::from)?;
+      file.read_to_string(&mut file_content)?;
 
       serde_yaml::from_str(&file_content).map_err(Error::from)
     } else {
@@ -231,7 +229,7 @@ impl Repository {
     let meta_file_path = self.get_meta_file_path(package_name);
 
     // convert data to string
-    let file_content = serde_yaml::to_string(metadata).map_err(Error::from)?;
+    let file_content = serde_yaml::to_string(metadata)?;
 
     // write data to file
     fs::write(meta_file_path, file_content).map_err(Error::from)

@@ -107,7 +107,7 @@ impl Repository {
 
   /// Get Config File as it is
   fn get_config(&self) -> Result<ConfigFile> {
-    let yml_string = fs::read_to_string(self.get_config_path()).map_err(Error::from)?;
+    let yml_string = fs::read_to_string(self.get_config_path())?;
 
     serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from)
   }
@@ -115,10 +115,10 @@ impl Repository {
   /// writes to the actual config file
   fn write_to_config(&self, config_file: &ConfigFile) -> Result<()> {
     // convert to yml string
-    let yml_string = serde_yaml::to_string(config_file).map_err(Error::from)?;
+    let yml_string = serde_yaml::to_string(config_file)?;
 
     // write to file
-    fs::write(self.get_config_path(), yml_string).map_err(Error::from)?;
+    fs::write(self.get_config_path(), yml_string)?;
 
     // update repository
     self.update()

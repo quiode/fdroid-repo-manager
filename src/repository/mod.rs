@@ -40,7 +40,7 @@ impl Repository {
         Err(Error::Custom("unsigned directory is a file!".to_owned()))
       }
     } else {
-      fs::create_dir(path.clone()).map_err(Error::from)?;
+      fs::create_dir(path.clone())?;
       Ok(path)
     }
   }
@@ -127,14 +127,14 @@ impl Repository {
     warn!("Clearing the repository!");
 
     // Delete all apps
-    fs::remove_dir_all(self.get_repo_path()).map_err(Error::from)?;
+    fs::remove_dir_all(self.get_repo_path())?;
     // Create directory again
-    fs::create_dir(self.get_repo_path()).map_err(Error::from)?;
+    fs::create_dir(self.get_repo_path())?;
 
     // Delete all metadata files
-    fs::remove_dir_all(self.get_metadata_path()).map_err(Error::from)?;
+    fs::remove_dir_all(self.get_metadata_path())?;
     // Create metadata directory
-    fs::create_dir(self.get_metadata_path()).map_err(Error::from)?;
+    fs::create_dir(self.get_metadata_path())?;
 
     // update index files etc
     self.update()

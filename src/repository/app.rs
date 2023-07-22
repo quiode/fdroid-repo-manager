@@ -242,7 +242,7 @@ impl Repository {
 
     // cleanup if error
     if update_result.is_err() && new_file_path.exists() && new_file_path.is_file() {
-      fs::remove_file(new_file_path).map_err(Error::from)?;
+      fs::remove_file(new_file_path)?;
     }
 
     Ok(())
@@ -258,7 +258,7 @@ impl Repository {
       // check if file as really a file
       if file_path.is_file() {
         // delete the file
-        fs::remove_file(file_path).map_err(Error::from)?;
+        fs::remove_file(file_path)?;
 
         // update metadata
         self.update()
@@ -313,7 +313,7 @@ impl Repository {
     // create temporary directory
     let temp_dir_path = PathBuf::from("/tmp/files");
     if !temp_dir_path.exists() {
-      fs::create_dir_all(temp_dir_path.clone()).map_err(Error::from)?;
+      fs::create_dir_all(temp_dir_path.clone())?;
     }
 
     // save file to temporary directory
@@ -327,16 +327,13 @@ impl Repository {
     file
       .file
       .persist(persistent_temp_file_path.clone())
-      .map_err(io::Error::from)
-      .map_err(Error::from)?;
+      .map_err(io::Error::from)?;
 
     // copy file
-    let file_copy_result = fs::copy(persistent_temp_file_path.clone(), path.clone())
-      .map_err(Error::from)
-      .map(|_| ());
+    let file_copy_result = fs::copy(persistent_temp_file_path.clone(), path.clone()).map(|_| ());
 
     // remove old file
-    fs::remove_file(persistent_temp_file_path).map_err(Error::from)?;
+    fs::remove_file(persistent_temp_file_path)?;
 
     // if copy operation was unsucessful, return here
     file_copy_result?;
