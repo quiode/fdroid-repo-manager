@@ -81,21 +81,23 @@ impl App {
 
 #[derive(Clone, Serialize)]
 pub struct Package {
+  // Exist
   added: i64,
   apk_name: String,
   hash: String,
   hash_type: String,
+  package_name: String,
+  size: u64,
+  version_name: String,
+  // Can be Missing
+  nativecode: Vec<String>,
   max_sdk_version: Option<u32>,
   min_sdk_version: Option<u32>,
-  nativecode: Vec<String>,
-  package_name: String,
-  sig: String,
-  signer: String,
-  size: u64,
+  sig: Option<String>,
+  signer: Option<String>,
   target_sdk_version: Option<u32>,
   uses_permission: Vec<(String, Option<u32>)>,
-  version_code: u64,
-  version_name: String,
+  version_code: Option<u64>,
 }
 
 impl Package {
@@ -103,14 +105,21 @@ impl Package {
   ///
   /// returns None if any field can't be converted
   fn from_json(value: &serde_json::Value) -> Option<Self> {
+    // Always Exist
     let added = value.get("added")?.as_i64()?;
     let apk_name = value.get("apkName")?.as_str()?.to_owned();
     let hash = value.get("hash")?.as_str()?.to_owned();
     let hash_type = value.get("hashType")?.as_str()?.to_owned();
+    let package_name = value.get("packageName")?.as_str()?.to_owned();
+    let size = value.get("size")?.as_u64()?;
+    let version_name = value.get("versionName")?.as_str()?.to_owned();
+
+    // Can be missing
     let max_sdk_version = value
       .get("maxSdkVersion")
       .and_then(|val| val.as_u64())
       .and_then(|val| val.try_into().ok());
+
     let min_sdk_version = value
       .get("minSdkVersion")
       .and_then(|val| val.as_u64())
@@ -118,14 +127,24 @@ impl Package {
 
     let mut nativecode = vec![];
 
-    for nativecode_entry in value.get("nativecode")?.as_array()? {
+    for nativecode_entry in value
+      .get("nativecode")
+      .and_then(|val| val.as_array())
+      .unwrap_or(&vec![])
+    {
       nativecode.push(nativecode_entry.as_str()?.to_owned());
     }
 
-    let package_name = value.get("packageName")?.as_str()?.to_owned();
-    let sig = value.get("sig")?.as_str()?.to_owned();
-    let signer = value.get("signer")?.as_str()?.to_owned();
-    let size = value.get("size")?.as_u64()?;
+    let sig = value
+      .get("sig")
+      .and_then(|val| val.as_str())
+      .map(|val| val.to_owned());
+
+    let signer = value
+      .get("signer")
+      .and_then(|val| val.as_str())
+      .map(|val| val.to_owned());
+
     let target_sdk_version = value
       .get("targetSdkVersion")
       .and_then(|val| val.as_u64())
@@ -148,8 +167,10 @@ impl Package {
       ));
     }
 
-    let version_code = value.get("versionCode")?.as_u64()?;
-    let version_name = value.get("versionName")?.as_str()?.to_owned();
+    let version_code = value
+      .get("versionCode")
+      .and_then(|val| val.as_u64())
+      .and_then(|val| val.try_into().ok());
 
     Some(Self {
       added,

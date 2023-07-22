@@ -19,3 +19,4 @@ serde_yaml = "0.9.21"
 [dev-dependencies]
 pretty_assertions = "1"
 uuid = { version = "1.4.1", features = ["v4"] }
+tempfile = "3.7.0"
