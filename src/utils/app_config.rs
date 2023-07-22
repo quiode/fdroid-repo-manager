@@ -195,7 +195,7 @@ impl AppConfig {
           }
         })
         .unwrap_or_default(),
-      repo_path: env::var("REPO_PATH")
+      repo_path: env::var("RM_REPO_PATH")
         .map(|string| {
           let parsed_string = string.parse();
 

@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/devcontainers/rust
-RUN apt-get update && apt-get install -y fdroidserver nginx && rm -rf /var/lib/apt/lists/* 
+RUN apt-get update && apt-get install -y fdroidserver nginx aapt && rm -rf /var/lib/apt/lists/* 
 RUN cargo install cargo-watch
 
 # Fdroid Setup

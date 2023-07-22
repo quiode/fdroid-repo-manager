@@ -8,7 +8,10 @@ use actix_multipart::form::tempfile::TempFile;
 use log::{info, warn};
 use serde::Serialize;
 
-use crate::utils::error::{Error, Result};
+use crate::utils::{
+  aapt::{get_apk_info, get_name, get_version_code},
+  error::{Error, Result},
+};
 
 use super::Repository;
 
@@ -245,6 +248,41 @@ impl Repository {
       warn!("Trying to delete \"{}\" but file does not exist!", apk_name);
       Ok(())
     }
+  }
+
+  /// Signs an apk and uploads it
+  ///
+  /// - parses apk metadata
+  /// - Uploads apk to unsigned folder
+  /// - signs apk
+  pub fn sign_app(&self, file: TempFile) -> Result<()> {
+    // get apk metadata
+    let apk_metadata = get_apk_info(&file.file.path().to_owned())?;
+
+    // get version and name
+    let apk_version = get_version_code(&apk_metadata)?;
+    let apk_name = get_name(&apk_metadata)?;
+
+    // Upload apk to unsigned folder
+    let file_path = self
+      .get_unsigned_path()?
+      .join(format!("{}_{}.apk", apk_name, apk_version));
+    self.persist_temp_file(file, file_path.clone())?;
+
+    // check if metadata exists
+    let metadata = self.get_metadata(&apk_name);
+    if metadata.is_err() {
+      warn!("No metadata for this package exists, creating empty metadata file!");
+      self.create_metadata(&apk_name)?;
+    }
+
+    // run fdroid publish
+    self.publish()?;
+
+    // run fdroid update
+    self.update()?;
+
+    Ok(())
   }
 
   /// Saves a temporary file to a final location

@@ -4,7 +4,7 @@ COPY . .
 RUN cargo install --path .
 
 FROM debian:bullseye-slim
-RUN apt-get update && apt-get install -y fdroidserver nginx && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y fdroidserver nginx aapt && rm -rf /var/lib/apt/lists/*
 
 # Fdroid Setup
 WORKDIR /fdroid

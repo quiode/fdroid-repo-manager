@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::{fs, fs::File, io::Read};
 
-use log::debug;
+use log::{debug, warn};
 use serde::{Deserialize, Serialize};
 
 use crate::utils::error::{Error, Result};
@@ -180,6 +180,23 @@ impl Repository {
     self.get_metadata_path().join(format!("{package_name}.yml"))
   }
 
+  /// runs "fdroid rewritemeta"
+  fn rewritemeta(&self) -> Result<()> {
+    self.run("rewritemeta", &vec![])
+  }
+
+  /// creates the metadata dir if it does not exist
+  fn create_metadata_dir(&self) -> Result<()> {
+    let metadata_path = self.get_metadata_path();
+
+    if !metadata_path.exists() {
+      fs::create_dir_all(metadata_path)?;
+      Ok(())
+    } else {
+      Ok(())
+    }
+  }
+
   /// Readas the metadata from an app
   ///
   /// # Error
@@ -218,5 +235,23 @@ impl Repository {
 
     // write data to file
     fs::write(meta_file_path, file_content).map_err(Error::from)
+  }
+
+  /// Creates an empty metadata file (if none exist) and runs fdroid rewritemeta
+  pub fn create_metadata(&self, package_name: &str) -> Result<()> {
+    let file_path = self.get_meta_file_path(package_name);
+
+    if file_path.is_file() {
+      warn!("Metadata file already exists!");
+    } else if file_path.exists() {
+      warn!("File Path already exists but is not a file!");
+    } else {
+      // create empty metadata file
+      self.create_metadata_dir()?;
+      fs::write(file_path, "")?;
+    }
+
+    // run fdroid rewritemeta to create basic meta file information
+    self.rewritemeta()
   }
 }
