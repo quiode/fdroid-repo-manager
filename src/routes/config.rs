@@ -7,6 +7,7 @@ use crate::repository::{config::PublicConfig, Repository};
 // TODO: update general info
 // TODO: backup keystore (get keystore and password),
 // TODO: update store picture
+// TODO: build apps using fdroid import, build
 #[get("")]
 pub(crate) async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
   let config = repo.get_public_config()?;
