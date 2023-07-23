@@ -107,3 +107,24 @@ fn upload_app() {
   let apps = repo.get_repo().get_apps().unwrap();
   assert_eq!(apps.len(), 1);
 }
+
+/// Test that getting and uploading config works
+#[test]
+fn upload_config() {
+  let repo = TestRepo::default();
+
+  // get default config
+  let mut config = repo.get_repo().get_public_config().unwrap();
+
+  // modify config
+  config.repo_name = Some("new name".to_string());
+  config.archive_description = Some("test description".to_string());
+
+  // save new config
+  repo.get_repo().set_config(&config).unwrap();
+
+  // get new safed config
+  let new_config = repo.get_repo().get_public_config().unwrap();
+
+  assert_eq!(config, new_config);
+}

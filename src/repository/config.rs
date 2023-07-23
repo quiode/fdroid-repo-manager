@@ -18,18 +18,28 @@ struct ConfigFile {
   keystorepass: String,
   keypass: String,
   keydname: String,
-  apksigner: String,
   // changeaple part
   // repo
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_url: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_icon: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_description: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  apksigner: Option<String>,
   // archive
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_url: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_icon: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_description: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_older: Option<u8>,
   // TODO: update_stats
 }
@@ -59,19 +69,19 @@ impl ConfigFile {
 }
 
 /// Part of the config file that can be changed
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct PublicConfig {
   // repo
-  repo_url: Option<String>,
-  repo_name: Option<String>,
-  repo_icon: Option<String>,
-  repo_description: Option<String>,
+  pub repo_url: Option<String>,
+  pub repo_name: Option<String>,
+  pub repo_icon: Option<String>,
+  pub repo_description: Option<String>,
   // archive
-  archive_url: Option<String>,
-  archive_name: Option<String>,
-  archive_icon: Option<String>,
-  archive_description: Option<String>,
-  archive_older: Option<u8>,
+  pub archive_url: Option<String>,
+  pub archive_name: Option<String>,
+  pub archive_icon: Option<String>,
+  pub archive_description: Option<String>,
+  pub archive_older: Option<u8>,
 }
 
 impl From<ConfigFile> for PublicConfig {
