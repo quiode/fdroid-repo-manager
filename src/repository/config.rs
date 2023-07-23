@@ -1,7 +1,7 @@
 //! Extension of Repository used to modify the config file
 
 use actix_multipart::form::tempfile::TempFile;
-use log::{debug, info};
+use log::debug;
 use std::fs;
 use std::path::PathBuf;
 
@@ -137,46 +137,30 @@ impl Repository {
       &image
         .file_name
         .clone()
-        .ok_or(Error::Custom("Image does not have a file name!".to_owned()))?,
+        .ok_or(Error::User("Image does not have a file name!".to_owned()))?,
     )
-    .ok_or(Error::Custom(
+    .ok_or(Error::User(
       "The image does not have an extension!".to_owned(),
     ))?;
 
     let current_image_type = get_file_extension(
       image_path
         .to_str()
-        .ok_or(Error::Custom("Current image path is invalid!".to_owned()))?,
+        .ok_or(Error::User("Current image path is invalid!".to_owned()))?,
     )
-    .ok_or(Error::Custom("Image does not have a file name!".to_owned()))?;
+    .ok_or(Error::User("Image does not have a file name!".to_owned()))?;
 
-    // if image types are not the same, change icon in config
+    // if image types are not the same, throw an error
     if new_image_type != current_image_type {
-      info!("New Image type is not the same as old one. Updating config!");
-
-      let mut config = self.get_config()?;
-      config.repo_icon = Some(format!("icon.{}", new_image_type));
-
-      // get new image path
-      let new_image_path = image_path
-        .parent()
-        .ok_or(Error::Custom("Invalid Icon Path!".to_owned()))?
-        .join(config.repo_icon.clone().unwrap());
-
-      // save new image
-      self.persist_temp_file(image, new_image_path)?;
-
-      // save new config file and update fdroid
-      self.write_to_config(&config)?;
-
-      // delete old image file
-      fs::remove_file(image_path)?;
+      Err(Error::User(
+        format!("Image type should be: {}", current_image_type).to_string(),
+      ))
     } else {
-      // just safe the image
+      // safe the image
       self.persist_temp_file(image, image_path)?;
-    }
 
-    Ok(())
+      Ok(())
+    }
   }
 
   /// Gets the path to the repository image

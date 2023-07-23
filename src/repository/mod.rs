@@ -38,7 +38,7 @@ impl Repository {
       if path.is_dir() {
         Ok(path)
       } else {
-        Err(Error::Custom("unsigned directory is a file!".to_owned()))
+        Err(Error::User("unsigned directory is a file!".to_owned()))
       }
     } else {
       fs::create_dir(path.clone())?;

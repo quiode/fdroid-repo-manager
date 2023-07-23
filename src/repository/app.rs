@@ -320,7 +320,7 @@ impl Repository {
     let persistent_temp_file_path = temp_dir_path.join(
       path
         .file_name()
-        .ok_or(Error::Custom("File Name not provided!".to_owned()))?,
+        .ok_or(Error::User("File Name not provided!".to_owned()))?,
     );
 
     // persist file to temporary location
