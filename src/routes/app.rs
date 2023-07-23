@@ -1,6 +1,6 @@
 //! Route used to edit apps and their metadata
 
-use actix_multipart::form::{tempfile::TempFile, MultipartForm};
+use actix_multipart::form::MultipartForm;
 use actix_web::{
   delete, get, post, put,
   web::{self, Json},
@@ -10,6 +10,7 @@ use log::{debug, info};
 
 use crate::repository::app_metadata::AppMetadata;
 use crate::repository::Repository;
+use crate::routes::FileUploadForm;
 
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
@@ -91,9 +92,4 @@ async fn cleanup_files(repo: web::Data<Repository>) -> Result<impl Responder> {
   repo.cleanup()?;
 
   Ok("")
-}
-
-#[derive(MultipartForm)]
-pub struct FileUploadForm {
-  app: TempFile,
 }

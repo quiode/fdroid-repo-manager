@@ -1,4 +1,7 @@
 use crate::repository::tests::utils::*;
+use itertools::Zip;
+use std::fs::File;
+use std::io::Read;
 
 /// Test Utils
 mod utils {
@@ -42,7 +45,7 @@ mod utils {
   }
 
   /// Returns the main path for test repos
-  fn get_repo_path() -> PathBuf {
+  pub fn get_repo_path() -> PathBuf {
     PathBuf::from("developement/tests").canonicalize().unwrap()
   }
 
@@ -59,7 +62,8 @@ mod utils {
     .map(|name| {
       let file_path = get_repo_path().join(format!("../test-resources/{name}.apk"));
       let file = File::open(&file_path).unwrap();
-      let temp_file = temp_file_from_file(&file, name);
+      let temp_file = temp_file_from_file(file, name);
+      let file = File::open(&file_path).unwrap();
       (name.to_string(), file_path, file, temp_file)
     })
     .collect()
@@ -71,7 +75,7 @@ mod utils {
   }
 
   /// Creates a temp file from an file
-  pub fn temp_file_from_file(file: &File, file_name: &str) -> TempFile {
+  pub fn temp_file_from_file(file: File, file_name: &str) -> TempFile {
     let file_contents: Vec<u8> = file.bytes().map(|byte| byte.unwrap()).collect();
     // create temp test file
     let mut temp_test_file = NamedTempFile::new().unwrap();
@@ -199,4 +203,44 @@ fn metadata() {
   let new_metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
 
   assert_eq!(metadata, new_metadata);
+}
+
+/// Tests if uploading an image works
+#[test]
+fn image_upload() {
+  let repo = TestRepo::default();
+
+  // get new image
+  let test_image_name = "test-icon.png";
+  let image_path = get_repo_path()
+    .join("../test-resources")
+    .join(test_image_name);
+  let image = File::open(image_path.clone()).unwrap();
+  let tmp_image = temp_file_from_file(image, test_image_name);
+  let mut image = File::open(image_path).unwrap();
+
+  // upload new image
+  repo.get_repo().save_image(tmp_image).unwrap();
+
+  // get uploaded image
+  let mut uploaded_image = File::open(repo.get_repo().get_image_path().unwrap()).unwrap();
+
+  // get both image contents
+  let mut image_content = vec![];
+  image.read_to_end(&mut image_content).unwrap();
+
+  let mut uploaded_image_content = vec![];
+  uploaded_image
+    .read_to_end(&mut uploaded_image_content)
+    .unwrap();
+
+  // check that lengths are the same
+  assert_eq!(image_content.len(), uploaded_image_content.len());
+  // check that length is bigger than 0
+  assert!(!image_content.is_empty());
+
+  // check that all elements are the same
+
+  // content should be the same
+  assert!(Zip::from((image_content, uploaded_image_content)).all(|zipped| zipped.0 == zipped.1));
 }

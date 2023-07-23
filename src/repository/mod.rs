@@ -7,6 +7,7 @@ use crate::utils::error::{Error, Result};
 pub mod app;
 pub mod app_metadata;
 pub mod config;
+#[cfg(test)]
 mod tests;
 
 #[derive(Debug, Clone)]
@@ -37,7 +38,7 @@ impl Repository {
       if path.is_dir() {
         Ok(path)
       } else {
-        Err(Error::Custom("unsigned directory is a file!".to_owned()))
+        Err(Error::User("unsigned directory is a file!".to_owned()))
       }
     } else {
       fs::create_dir(path.clone())?;
@@ -73,6 +74,8 @@ impl Repository {
     self
       .run("init", &vec![])
       .expect("Failed to initialize the repository!");
+
+    self.update().expect("Failed to update the repository!");
   }
 
   /// Runs "fdroid update -c; fdroid update"

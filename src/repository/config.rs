@@ -1,10 +1,14 @@
 //! Extension of Repository used to modify the config file
 
+use actix_multipart::form::tempfile::TempFile;
+use log::debug;
 use std::fs;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
 use crate::utils::error::{Error, Result};
+use crate::utils::general::get_file_extension;
 
 use super::Repository;
 
@@ -120,6 +124,53 @@ impl Repository {
     let config_file = self.get_config()?;
 
     Ok(config_file.keystorepass)
+  }
+
+  /// Saves the store image
+  pub fn save_image(&self, image: TempFile) -> Result<()> {
+    debug!("Saving to repository image!");
+
+    let image_path = self.get_image_path()?;
+
+    // check if it is the same image type
+    let new_image_type = get_file_extension(
+      &image
+        .file_name
+        .clone()
+        .ok_or(Error::User("Image does not have a file name!".to_owned()))?,
+    )
+    .ok_or(Error::User(
+      "The image does not have an extension!".to_owned(),
+    ))?;
+
+    let current_image_type = get_file_extension(
+      image_path
+        .to_str()
+        .ok_or(Error::User("Current image path is invalid!".to_owned()))?,
+    )
+    .ok_or(Error::User("Image does not have a file name!".to_owned()))?;
+
+    // if image types are not the same, throw an error
+    if new_image_type != current_image_type {
+      Err(Error::User(
+        format!("Image type should be: {}", current_image_type).to_string(),
+      ))
+    } else {
+      // safe the image
+      self.persist_temp_file(image, image_path)?;
+
+      Ok(())
+    }
+  }
+
+  /// Gets the path to the repository image
+  pub fn get_image_path(&self) -> Result<PathBuf> {
+    let image_name = self
+      .get_config()?
+      .repo_icon
+      .unwrap_or("icon.png".to_owned());
+
+    Ok(self.get_repo_path().join("icons").join(image_name))
   }
 
   /// Get Config File as it is
