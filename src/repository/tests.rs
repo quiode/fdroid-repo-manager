@@ -200,3 +200,9 @@ fn metadata() {
 
   assert_eq!(metadata, new_metadata);
 }
+
+/// Tests if uploading an image works
+#[test]
+fn image_upload() {
+  todo!("Test for uploading an image")
+}
