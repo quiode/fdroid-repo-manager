@@ -1,0 +1,202 @@
+use crate::repository::tests::utils::*;
+
+/// Test Utils
+mod utils {
+  use crate::repository::Repository;
+  use actix_multipart::form::tempfile::TempFile;
+  use std::fs::File;
+  use std::io::{Read, Write};
+  use std::{fs, path::PathBuf};
+  use tempfile::NamedTempFile;
+  use uuid::Uuid;
+
+  /// NewType for Repository struct
+  /// Most important: Removes all files after being dropped
+  pub struct TestRepo(Repository);
+  type TestApk = (String, PathBuf, File, TempFile);
+
+  impl Drop for TestRepo {
+    fn drop(&mut self) {
+      // delete directory
+      fs::remove_dir_all(&self.0.path).unwrap();
+    }
+  }
+
+  impl TestRepo {
+    pub fn get_repo(&self) -> &Repository {
+      &self.0
+    }
+  }
+
+  impl Default for TestRepo {
+    fn default() -> Self {
+      // create new test repo in empty, random directory
+
+      // create unique repo path
+      let repo_path = get_repo_path().join(Uuid::new_v4().to_string());
+      // create repo
+      fs::create_dir_all(&repo_path).unwrap();
+
+      Self(Repository::new(repo_path))
+    }
+  }
+
+  /// Returns the main path for test repos
+  fn get_repo_path() -> PathBuf {
+    PathBuf::from("developement/tests").canonicalize().unwrap()
+  }
+
+  /// Returns a list of all available test apks
+  pub fn get_test_apks() -> Vec<TestApk> {
+    vec![
+      "com.dede.android_eggs_28",
+      "fr.ralala.hexviewer_142",
+      "me.hackerchick.catima_128",
+      "nodomain.freeyourgadget.gadgetbridge_224",
+      "org.woheller69.gpscockpit_240",
+    ]
+    .iter()
+    .map(|name| {
+      let file_path = get_repo_path().join(format!("../test-resources/{name}.apk"));
+      let file = File::open(&file_path).unwrap();
+      let temp_file = temp_file_from_file(&file, name);
+      (name.to_string(), file_path, file, temp_file)
+    })
+    .collect()
+  }
+
+  /// Returns a single TestApk for testing
+  pub fn get_test_apk() -> TestApk {
+    get_test_apks().pop().unwrap()
+  }
+
+  /// Creates a temp file from an file
+  pub fn temp_file_from_file(file: &File, file_name: &str) -> TempFile {
+    let file_contents: Vec<u8> = file.bytes().map(|byte| byte.unwrap()).collect();
+    // create temp test file
+    let mut temp_test_file = NamedTempFile::new().unwrap();
+    temp_test_file.write_all(&file_contents).unwrap();
+
+    TempFile {
+      file: temp_test_file,
+      content_type: None,
+      file_name: Some(file_name.to_owned()),
+      size: 0,
+    }
+  }
+
+  /// Creates a new repo with one app uploaded
+  pub fn init_default() -> TestRepo {
+    let repo = TestRepo::default();
+
+    // get app
+    let test_apk = get_test_apk();
+
+    // sign app
+    repo.get_repo().sign_app(test_apk.3).unwrap();
+    repo
+  }
+}
+
+/// Tests that in a new repo, all apps are empty
+#[test]
+fn apps_empty() {
+  let repo = TestRepo::default();
+
+  assert!(repo.get_repo().get_apps().unwrap().is_empty());
+}
+
+/// Test that uploading an app works
+#[test]
+fn upload_app() {
+  let repo = init_default();
+
+  // check that one app has been created
+  let apps = repo.get_repo().get_apps().unwrap();
+  assert_eq!(apps.len(), 1);
+}
+
+/// Test that getting and uploading config works
+#[test]
+fn upload_config() {
+  let repo = TestRepo::default();
+
+  // get default config
+  let mut config = repo.get_repo().get_public_config().unwrap();
+
+  // modify config
+  config.repo_name = Some("new name".to_string());
+  config.archive_description = Some("test description".to_string());
+
+  // save new config
+  repo.get_repo().set_config(&config).unwrap();
+
+  // get new safed config
+  let new_config = repo.get_repo().get_public_config().unwrap();
+
+  assert_eq!(config, new_config);
+}
+
+/// Tests if signing works
+#[test]
+fn sign() {
+  let repo = init_default();
+
+  // check that one app has been created
+  let apps = repo.get_repo().get_apps().unwrap();
+  assert_eq!(apps.len(), 1);
+}
+
+/// Tests that deleting one app works
+#[test]
+fn delete_one() {
+  let repo = init_default();
+
+  let mut apps = repo.get_repo().get_apps().unwrap();
+
+  // only one app should exist
+  assert_eq!(apps.len(), 1);
+
+  let mut app = apps.pop().unwrap();
+
+  // only one package should exist
+  assert_eq!(app.packages.len(), 1);
+
+  let package = app.packages.pop().unwrap();
+
+  // delete app
+  repo.get_repo().delete_app(&package.apk_name).unwrap();
+
+  // check that apps is empty
+  let apps = repo.get_repo().get_apps().unwrap();
+
+  assert!(apps.is_empty());
+}
+
+/// Tests that reading/writing metadata works
+#[test]
+fn metadata() {
+  let repo = init_default();
+
+  // get app
+  let app = repo.get_repo().get_apps().unwrap().pop().unwrap();
+
+  // get metadata
+  let mut metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+
+  // change metadata
+  metadata.AuthorName = Some("Dominik Schwaiger".to_string());
+  metadata.AuthorEmail = Some("mail@dominik-schwaiger.ch".to_string());
+  metadata.WebSite = Some("dominik-schwaiger.ch".to_string());
+
+  // upload metadata
+  repo
+    .get_repo()
+    .set_metadata(&app.package_name, &metadata)
+    .unwrap();
+
+  // get new metadata
+  let new_metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+
+  assert_eq!(metadata, new_metadata);
+}

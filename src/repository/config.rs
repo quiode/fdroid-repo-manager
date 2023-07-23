@@ -18,18 +18,28 @@ struct ConfigFile {
   keystorepass: String,
   keypass: String,
   keydname: String,
-  apksigner: String,
   // changeaple part
   // repo
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_url: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_icon: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   repo_description: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  apksigner: Option<String>,
   // archive
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_url: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_icon: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_description: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   archive_older: Option<u8>,
   // TODO: update_stats
 }
@@ -59,19 +69,19 @@ impl ConfigFile {
 }
 
 /// Part of the config file that can be changed
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct PublicConfig {
   // repo
-  repo_url: Option<String>,
-  repo_name: Option<String>,
-  repo_icon: Option<String>,
-  repo_description: Option<String>,
+  pub repo_url: Option<String>,
+  pub repo_name: Option<String>,
+  pub repo_icon: Option<String>,
+  pub repo_description: Option<String>,
   // archive
-  archive_url: Option<String>,
-  archive_name: Option<String>,
-  archive_icon: Option<String>,
-  archive_description: Option<String>,
-  archive_older: Option<u8>,
+  pub archive_url: Option<String>,
+  pub archive_name: Option<String>,
+  pub archive_icon: Option<String>,
+  pub archive_description: Option<String>,
+  pub archive_older: Option<u8>,
 }
 
 impl From<ConfigFile> for PublicConfig {
@@ -107,7 +117,7 @@ impl Repository {
 
   /// Get Config File as it is
   fn get_config(&self) -> Result<ConfigFile> {
-    let yml_string = fs::read_to_string(self.get_config_path()).map_err(Error::from)?;
+    let yml_string = fs::read_to_string(self.get_config_path())?;
 
     serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from)
   }
@@ -115,10 +125,10 @@ impl Repository {
   /// writes to the actual config file
   fn write_to_config(&self, config_file: &ConfigFile) -> Result<()> {
     // convert to yml string
-    let yml_string = serde_yaml::to_string(config_file).map_err(Error::from)?;
+    let yml_string = serde_yaml::to_string(config_file)?;
 
     // write to file
-    fs::write(self.get_config_path(), yml_string).map_err(Error::from)?;
+    fs::write(self.get_config_path(), yml_string)?;
 
     // update repository
     self.update()

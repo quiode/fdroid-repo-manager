@@ -17,14 +17,14 @@ use super::Repository;
 
 #[derive(Clone, Serialize)]
 pub struct App {
-  categories: Vec<String>,
-  suggested_version_code: String,
-  license: String,
-  name: String,
-  added: i64,
-  package_name: String,
-  last_updated: i64,
-  packages: Vec<Package>,
+  pub package_name: String,
+  pub categories: Vec<String>,
+  pub suggested_version_code: String,
+  pub license: String,
+  pub name: String,
+  pub added: i64,
+  pub last_updated: i64,
+  pub packages: Vec<Package>,
 }
 
 impl App {
@@ -81,21 +81,23 @@ impl App {
 
 #[derive(Clone, Serialize)]
 pub struct Package {
-  added: i64,
-  apk_name: String,
-  hash: String,
-  hash_type: String,
-  max_sdk_version: Option<u32>,
-  min_sdk_version: Option<u32>,
-  nativecode: Vec<String>,
-  package_name: String,
-  sig: String,
-  signer: String,
-  size: u64,
-  target_sdk_version: Option<u32>,
-  uses_permission: Vec<(String, Option<u32>)>,
-  version_code: u64,
-  version_name: String,
+  // Exist
+  pub added: i64,
+  pub apk_name: String,
+  pub hash: String,
+  pub hash_type: String,
+  pub package_name: String,
+  pub size: u64,
+  pub version_name: String,
+  // Can be Missing
+  pub nativecode: Vec<String>,
+  pub max_sdk_version: Option<u32>,
+  pub min_sdk_version: Option<u32>,
+  pub sig: Option<String>,
+  pub signer: Option<String>,
+  pub target_sdk_version: Option<u32>,
+  pub uses_permission: Vec<(String, Option<u32>)>,
+  pub version_code: Option<u64>,
 }
 
 impl Package {
@@ -103,14 +105,21 @@ impl Package {
   ///
   /// returns None if any field can't be converted
   fn from_json(value: &serde_json::Value) -> Option<Self> {
+    // Always Exist
     let added = value.get("added")?.as_i64()?;
     let apk_name = value.get("apkName")?.as_str()?.to_owned();
     let hash = value.get("hash")?.as_str()?.to_owned();
     let hash_type = value.get("hashType")?.as_str()?.to_owned();
+    let package_name = value.get("packageName")?.as_str()?.to_owned();
+    let size = value.get("size")?.as_u64()?;
+    let version_name = value.get("versionName")?.as_str()?.to_owned();
+
+    // Can be missing
     let max_sdk_version = value
       .get("maxSdkVersion")
       .and_then(|val| val.as_u64())
       .and_then(|val| val.try_into().ok());
+
     let min_sdk_version = value
       .get("minSdkVersion")
       .and_then(|val| val.as_u64())
@@ -118,14 +127,24 @@ impl Package {
 
     let mut nativecode = vec![];
 
-    for nativecode_entry in value.get("nativecode")?.as_array()? {
+    for nativecode_entry in value
+      .get("nativecode")
+      .and_then(|val| val.as_array())
+      .unwrap_or(&vec![])
+    {
       nativecode.push(nativecode_entry.as_str()?.to_owned());
     }
 
-    let package_name = value.get("packageName")?.as_str()?.to_owned();
-    let sig = value.get("sig")?.as_str()?.to_owned();
-    let signer = value.get("signer")?.as_str()?.to_owned();
-    let size = value.get("size")?.as_u64()?;
+    let sig = value
+      .get("sig")
+      .and_then(|val| val.as_str())
+      .map(|val| val.to_owned());
+
+    let signer = value
+      .get("signer")
+      .and_then(|val| val.as_str())
+      .map(|val| val.to_owned());
+
     let target_sdk_version = value
       .get("targetSdkVersion")
       .and_then(|val| val.as_u64())
@@ -148,8 +167,10 @@ impl Package {
       ));
     }
 
-    let version_code = value.get("versionCode")?.as_u64()?;
-    let version_name = value.get("versionName")?.as_str()?.to_owned();
+    let version_code = value
+      .get("versionCode")
+      .and_then(|val| val.as_u64())
+      .and_then(|val| val.try_into().ok());
 
     Some(Self {
       added,
@@ -221,7 +242,7 @@ impl Repository {
 
     // cleanup if error
     if update_result.is_err() && new_file_path.exists() && new_file_path.is_file() {
-      fs::remove_file(new_file_path).map_err(Error::from)?;
+      fs::remove_file(new_file_path)?;
     }
 
     Ok(())
@@ -237,7 +258,7 @@ impl Repository {
       // check if file as really a file
       if file_path.is_file() {
         // delete the file
-        fs::remove_file(file_path).map_err(Error::from)?;
+        fs::remove_file(file_path)?;
 
         // update metadata
         self.update()
@@ -292,7 +313,7 @@ impl Repository {
     // create temporary directory
     let temp_dir_path = PathBuf::from("/tmp/files");
     if !temp_dir_path.exists() {
-      fs::create_dir_all(temp_dir_path.clone()).map_err(Error::from)?;
+      fs::create_dir_all(temp_dir_path.clone())?;
     }
 
     // save file to temporary directory
@@ -306,16 +327,13 @@ impl Repository {
     file
       .file
       .persist(persistent_temp_file_path.clone())
-      .map_err(io::Error::from)
-      .map_err(Error::from)?;
+      .map_err(io::Error::from)?;
 
     // copy file
-    let file_copy_result = fs::copy(persistent_temp_file_path.clone(), path.clone())
-      .map_err(Error::from)
-      .map(|_| ());
+    let file_copy_result = fs::copy(persistent_temp_file_path.clone(), path.clone()).map(|_| ());
 
     // remove old file
-    fs::remove_file(persistent_temp_file_path).map_err(Error::from)?;
+    fs::remove_file(persistent_temp_file_path)?;
 
     // if copy operation was unsucessful, return here
     file_copy_result?;
