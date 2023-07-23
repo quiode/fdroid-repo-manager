@@ -9,7 +9,7 @@ use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
 use crate::routes::app::*;
-use crate::routes::config::{get_config, post_config};
+use crate::routes::config::{get_config, get_keystore, get_keystore_password, post_config};
 use crate::utils::app_config::{AppConfig, WrappedValue};
 
 mod guards;
@@ -50,6 +50,8 @@ async fn main() -> std::io::Result<()> {
       .wrap(middleware::NormalizePath::new(
         middleware::TrailingSlash::Trim,
       ))
+      // compress responses
+      .wrap(middleware::Compress::default())
       // add logger as middleware
       .wrap(logger)
       // health service for HEALTHCHECK in docker
@@ -73,6 +75,8 @@ async fn main() -> std::io::Result<()> {
         web::scope("/config")
           .service(get_config)
           .service(post_config)
+          .service(get_keystore)
+          .service(get_keystore_password)
           .guard(AuthGuard),
       )
       // app services for manipulating apps

@@ -115,6 +115,13 @@ impl Repository {
     self.write_to_config(&merged_config)
   }
 
+  /// Returns the keystore password
+  pub fn get_keystore_password(&self) -> Result<String> {
+    let config_file = self.get_config()?;
+
+    Ok(config_file.keystorepass)
+  }
+
   /// Get Config File as it is
   fn get_config(&self) -> Result<ConfigFile> {
     let yml_string = fs::read_to_string(self.get_config_path())?;
