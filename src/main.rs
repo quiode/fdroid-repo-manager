@@ -9,7 +9,9 @@ use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
 use crate::routes::app::*;
-use crate::routes::config::{get_config, get_keystore, get_keystore_password, post_config};
+use crate::routes::config::{
+  get_config, get_keystore, get_keystore_password, get_picture, post_config, upload_picture,
+};
 use crate::utils::app_config::{AppConfig, WrappedValue};
 
 mod guards;
@@ -77,6 +79,8 @@ async fn main() -> std::io::Result<()> {
           .service(post_config)
           .service(get_keystore)
           .service(get_keystore_password)
+          .service(upload_picture)
+          .service(get_picture)
           .guard(AuthGuard),
       )
       // app services for manipulating apps

@@ -309,7 +309,7 @@ impl Repository {
   /// Saves a temporary file to a final location
   ///
   /// Needed because file.persist() throws error if the destination directory is mounted inside a docker container
-  fn persist_temp_file(&self, file: TempFile, path: PathBuf) -> Result<File> {
+  pub fn persist_temp_file(&self, file: TempFile, path: PathBuf) -> Result<File> {
     // create temporary directory
     let temp_dir_path = PathBuf::from("/tmp/files");
     if !temp_dir_path.exists() {

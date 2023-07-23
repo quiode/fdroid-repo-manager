@@ -7,6 +7,7 @@ use crate::utils::error::{Error, Result};
 pub mod app;
 pub mod app_metadata;
 pub mod config;
+#[cfg(test)]
 mod tests;
 
 #[derive(Debug, Clone)]

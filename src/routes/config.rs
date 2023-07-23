@@ -1,6 +1,8 @@
 //! Route used to edit the config.yml file#[get("")]
 
 use crate::repository::{config::PublicConfig, Repository};
+use crate::routes::FileUploadForm;
+use actix_multipart::form::MultipartForm;
 use actix_web::web::Json;
 use actix_web::{get, post, web, HttpRequest, Responder, Result};
 use log::debug;
@@ -45,4 +47,25 @@ async fn get_keystore_password(repo: web::Data<Repository>) -> Result<impl Respo
   let mut map = HashMap::new();
   map.insert("password", password);
   Ok(Json(map))
+}
+
+/// Set the store picture
+#[post("/picture")]
+async fn upload_picture(
+  repo: web::Data<Repository>,
+  form: MultipartForm<FileUploadForm>,
+) -> Result<impl Responder> {
+  repo.save_image(form.0.app)?;
+
+  Ok("")
+}
+
+/// Gets the store picture
+#[get("/picture")]
+async fn get_picture(request: HttpRequest, repo: web::Data<Repository>) -> Result<impl Responder> {
+  debug!("Downloading Image!");
+
+  let keystore = actix_files::NamedFile::open_async(repo.get_image_path()?).await?;
+
+  Ok(keystore.into_response(&request))
 }
