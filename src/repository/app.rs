@@ -17,14 +17,14 @@ use super::Repository;
 
 #[derive(Clone, Serialize)]
 pub struct App {
-  categories: Vec<String>,
-  suggested_version_code: String,
-  license: String,
-  name: String,
-  added: i64,
-  package_name: String,
-  last_updated: i64,
-  packages: Vec<Package>,
+  pub package_name: String,
+  pub categories: Vec<String>,
+  pub suggested_version_code: String,
+  pub license: String,
+  pub name: String,
+  pub added: i64,
+  pub last_updated: i64,
+  pub packages: Vec<Package>,
 }
 
 impl App {
@@ -82,22 +82,22 @@ impl App {
 #[derive(Clone, Serialize)]
 pub struct Package {
   // Exist
-  added: i64,
-  apk_name: String,
-  hash: String,
-  hash_type: String,
-  package_name: String,
-  size: u64,
-  version_name: String,
+  pub added: i64,
+  pub apk_name: String,
+  pub hash: String,
+  pub hash_type: String,
+  pub package_name: String,
+  pub size: u64,
+  pub version_name: String,
   // Can be Missing
-  nativecode: Vec<String>,
-  max_sdk_version: Option<u32>,
-  min_sdk_version: Option<u32>,
-  sig: Option<String>,
-  signer: Option<String>,
-  target_sdk_version: Option<u32>,
-  uses_permission: Vec<(String, Option<u32>)>,
-  version_code: Option<u64>,
+  pub nativecode: Vec<String>,
+  pub max_sdk_version: Option<u32>,
+  pub min_sdk_version: Option<u32>,
+  pub sig: Option<String>,
+  pub signer: Option<String>,
+  pub target_sdk_version: Option<u32>,
+  pub uses_permission: Vec<(String, Option<u32>)>,
+  pub version_code: Option<u64>,
 }
 
 impl Package {

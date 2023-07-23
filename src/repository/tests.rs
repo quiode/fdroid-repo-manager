@@ -10,6 +10,8 @@ mod utils {
   use tempfile::NamedTempFile;
   use uuid::Uuid;
 
+  /// NewType for Repository struct
+  /// Most important: Removes all files after being dropped
   pub struct TestRepo(Repository);
   type TestApk = (String, PathBuf, File, TempFile);
 
@@ -82,6 +84,18 @@ mod utils {
       size: 0,
     }
   }
+
+  /// Creates a new repo with one app uploaded
+  pub fn init_default() -> TestRepo {
+    let repo = TestRepo::default();
+
+    // get app
+    let test_apk = get_test_apk();
+
+    // sign app
+    repo.get_repo().sign_app(test_apk.3).unwrap();
+    repo
+  }
 }
 
 /// Tests that in a new repo, all apps are empty
@@ -95,13 +109,7 @@ fn apps_empty() {
 /// Test that uploading an app works
 #[test]
 fn upload_app() {
-  let repo = TestRepo::default();
-
-  // get app
-  let test_apk = get_test_apk();
-
-  // upload app
-  repo.get_repo().upload_app(test_apk.3).unwrap();
+  let repo = init_default();
 
   // check that one app has been created
   let apps = repo.get_repo().get_apps().unwrap();
@@ -132,15 +140,35 @@ fn upload_config() {
 /// Tests if signing works
 #[test]
 fn sign() {
-  let repo = TestRepo::default();
-
-  // get app
-  let test_apk = get_test_apk();
-
-  // sign app
-  repo.get_repo().sign_app(test_apk.3).unwrap();
+  let repo = init_default();
 
   // check that one app has been created
   let apps = repo.get_repo().get_apps().unwrap();
   assert_eq!(apps.len(), 1);
+}
+
+/// Tests that deleting one app works
+#[test]
+fn delete_one() {
+  let repo = init_default();
+
+  let mut apps = repo.get_repo().get_apps().unwrap();
+
+  // only one app should exist
+  assert_eq!(apps.len(), 1);
+
+  let mut app = apps.pop().unwrap();
+
+  // only one package should exist
+  assert_eq!(app.packages.len(), 1);
+
+  let package = app.packages.pop().unwrap();
+
+  // delete app
+  repo.get_repo().delete_app(&package.apk_name).unwrap();
+
+  // check that apps is empty
+  let apps = repo.get_repo().get_apps().unwrap();
+
+  assert!(apps.is_empty());
 }
