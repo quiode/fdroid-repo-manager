@@ -145,4 +145,9 @@ impl Repository {
     debug!("Cleaning up metadata files!");
     self.run("rewritemeta", &vec![])
   }
+
+  /// Returns the path to the keystore file
+  pub fn get_keystore_path(&self) -> PathBuf {
+    self.path.join("keystore.p12")
+  }
 }
