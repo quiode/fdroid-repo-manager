@@ -128,3 +128,19 @@ fn upload_config() {
 
   assert_eq!(config, new_config);
 }
+
+/// Tests if signing works
+#[test]
+fn sign() {
+  let repo = TestRepo::default();
+
+  // get app
+  let test_apk = get_test_apk();
+
+  // sign app
+  repo.get_repo().sign_app(test_apk.3).unwrap();
+
+  // check that one app has been created
+  let apps = repo.get_repo().get_apps().unwrap();
+  assert_eq!(apps.len(), 1);
+}
