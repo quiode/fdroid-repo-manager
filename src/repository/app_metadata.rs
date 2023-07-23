@@ -180,11 +180,6 @@ impl Repository {
     self.get_metadata_path().join(format!("{package_name}.yml"))
   }
 
-  /// runs "fdroid rewritemeta"
-  fn rewritemeta(&self) -> Result<()> {
-    self.run("rewritemeta", &vec![])
-  }
-
   /// creates the metadata dir if it does not exist
   fn create_metadata_dir(&self) -> Result<()> {
     let metadata_path = self.get_metadata_path();
@@ -250,6 +245,6 @@ impl Repository {
     }
 
     // run fdroid rewritemeta to create basic meta file information
-    self.rewritemeta()
+    self.cleanup()
   }
 }
