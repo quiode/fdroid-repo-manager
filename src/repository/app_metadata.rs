@@ -8,90 +8,90 @@ use crate::utils::error::{Error, Result};
 
 use super::Repository;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Ord, PartialOrd, Eq, PartialEq)]
 #[allow(non_snake_case)]
 pub struct AppMetadata {
-  Categories: Option<Vec<Categories>>,
-  AuthorName: Option<String>,
-  AuthorEmail: Option<String>,
-  AuthorWebSite: Option<String>,
-  License: Option<String>,
-  AutoName: Option<String>,
-  Name: Option<String>,
-  WebSite: Option<String>,
-  SourceCode: Option<String>,
-  IssueTracker: Option<String>,
-  Translation: Option<String>,
-  Changelog: Option<String>,
-  Donate: Option<String>,
-  FlattrID: Option<String>,
-  Liberapay: Option<String>,
-  OpenCollective: Option<String>,
-  Bitcoin: Option<String>,
-  Litecoin: Option<String>,
-  Summary: Option<String>,
-  Description: Option<String>,
-  MaintainerNotes: Option<String>,
-  RepoType: Option<RepoType>,
-  Repo: Option<String>,
-  Binaries: Option<String>,
-  Builds: Option<Builds>,
-  AllowedAPKSigningKeys: Option<String>,
-  AntiFeatures: Option<AntiFeatures>,
-  Disabled: Option<String>,
-  RequiresRoot: Option<bool>,
-  ArchivePolicy: Option<u32>,
-  UpdateCheckMode: Option<UpdateCheckMode>,
-  UpdateCheckIgnore: Option<String>,
-  VercodeOperation: Option<String>,
-  UpdateCheckName: Option<String>,
-  UpdateCheckData: Option<String>,
-  AutoUpdateMode: Option<AutoUpdateMode>,
-  CurrentVersion: Option<String>,
-  CurrentVersionCode: Option<String>,
-  NoSourceSince: Option<String>,
+  pub Categories: Option<Vec<Categories>>,
+  pub AuthorName: Option<String>,
+  pub AuthorEmail: Option<String>,
+  pub AuthorWebSite: Option<String>,
+  pub License: Option<String>,
+  pub AutoName: Option<String>,
+  pub Name: Option<String>,
+  pub WebSite: Option<String>,
+  pub SourceCode: Option<String>,
+  pub IssueTracker: Option<String>,
+  pub Translation: Option<String>,
+  pub Changelog: Option<String>,
+  pub Donate: Option<String>,
+  pub FlattrID: Option<String>,
+  pub Liberapay: Option<String>,
+  pub OpenCollective: Option<String>,
+  pub Bitcoin: Option<String>,
+  pub Litecoin: Option<String>,
+  pub Summary: Option<String>,
+  pub Description: Option<String>,
+  pub MaintainerNotes: Option<String>,
+  pub RepoType: Option<RepoType>,
+  pub Repo: Option<String>,
+  pub Binaries: Option<String>,
+  pub Builds: Option<Builds>,
+  pub AllowedAPKSigningKeys: Option<String>,
+  pub AntiFeatures: Option<AntiFeatures>,
+  pub Disabled: Option<String>,
+  pub RequiresRoot: Option<bool>,
+  pub ArchivePolicy: Option<u32>,
+  pub UpdateCheckMode: Option<UpdateCheckMode>,
+  pub UpdateCheckIgnore: Option<String>,
+  pub VercodeOperation: Option<String>,
+  pub UpdateCheckName: Option<String>,
+  pub UpdateCheckData: Option<String>,
+  pub AutoUpdateMode: Option<AutoUpdateMode>,
+  pub CurrentVersion: Option<String>,
+  pub CurrentVersionCode: Option<String>,
+  pub NoSourceSince: Option<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Ord, PartialOrd, Eq, PartialEq)]
 #[allow(non_snake_case)]
 pub struct Builds {
-  versionName: Option<String>,
-  versionCode: Option<String>,
-  commit: Option<String>,
-  disable: Option<String>,
-  subdir: Option<String>,
-  submodules: Option<bool>,
-  sudo: Option<String>,
-  timeout: Option<u64>,
-  init: Option<String>,
-  oldsdkloc: Option<bool>,
-  target: Option<String>,
-  androidupdate: Option<AndroidUpdate>,
-  encoding: Option<String>,
-  forceversion: Option<bool>,
-  forcevercode: Option<bool>,
-  rm: Option<Vec<String>>,
-  extlibs: Option<Vec<String>>,
-  srclibs: Option<Vec<String>>,
-  patch: Option<String>,
-  prebuild: Option<String>,
-  scanignore: Option<Vec<String>>,
-  scandelete: Option<Vec<String>>,
-  build: Option<String>,
-  buildjni: Option<String>,
-  ndk: Option<String>,
-  gradle: Option<Vec<String>>,
-  maven: Option<String>,
-  preassemble: Option<Vec<String>>,
-  gradleprops: Option<Vec<String>>,
-  antcommands: Option<Vec<String>>,
-  output: Option<String>,
-  postbuild: Option<String>,
-  novcheck: Option<bool>,
-  antifeatures: Option<Vec<AntiFeatures>>,
+  pub versionName: Option<String>,
+  pub versionCode: Option<String>,
+  pub commit: Option<String>,
+  pub disable: Option<String>,
+  pub subdir: Option<String>,
+  pub submodules: Option<bool>,
+  pub sudo: Option<String>,
+  pub timeout: Option<u64>,
+  pub init: Option<String>,
+  pub oldsdkloc: Option<bool>,
+  pub target: Option<String>,
+  pub androidupdate: Option<AndroidUpdate>,
+  pub encoding: Option<String>,
+  pub forceversion: Option<bool>,
+  pub forcevercode: Option<bool>,
+  pub rm: Option<Vec<String>>,
+  pub extlibs: Option<Vec<String>>,
+  pub srclibs: Option<Vec<String>>,
+  pub patch: Option<String>,
+  pub prebuild: Option<String>,
+  pub scanignore: Option<Vec<String>>,
+  pub scandelete: Option<Vec<String>>,
+  pub build: Option<String>,
+  pub buildjni: Option<String>,
+  pub ndk: Option<String>,
+  pub gradle: Option<Vec<String>>,
+  pub maven: Option<String>,
+  pub preassemble: Option<Vec<String>>,
+  pub gradleprops: Option<Vec<String>>,
+  pub antcommands: Option<Vec<String>>,
+  pub output: Option<String>,
+  pub postbuild: Option<String>,
+  pub novcheck: Option<bool>,
+  pub antifeatures: Option<Vec<AntiFeatures>>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum Categories {
   Connectivity,
@@ -117,7 +117,7 @@ pub enum Categories {
   Custom(String),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum RepoType {
   #[serde(rename = "git")]
   Git,
@@ -133,7 +133,7 @@ pub enum RepoType {
   Srclib,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum AntiFeatures {
   Ads,
   Tracking,
@@ -149,7 +149,7 @@ pub enum AntiFeatures {
   NoSourceSince,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum UpdateCheckMode {
   None,
   Static,
@@ -160,13 +160,13 @@ pub enum UpdateCheckMode {
   Http,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum AutoUpdateMode {
   None,
   Version,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum AndroidUpdate {
   #[serde(rename = "auto")]
   Auto,

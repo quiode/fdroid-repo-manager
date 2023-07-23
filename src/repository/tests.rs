@@ -172,3 +172,31 @@ fn delete_one() {
 
   assert!(apps.is_empty());
 }
+
+/// Tests that reading/writing metadata works
+#[test]
+fn metadata() {
+  let repo = init_default();
+
+  // get app
+  let app = repo.get_repo().get_apps().unwrap().pop().unwrap();
+
+  // get metadata
+  let mut metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+
+  // change metadata
+  metadata.AuthorName = Some("Dominik Schwaiger".to_string());
+  metadata.AuthorEmail = Some("mail@dominik-schwaiger.ch".to_string());
+  metadata.WebSite = Some("dominik-schwaiger.ch".to_string());
+
+  // upload metadata
+  repo
+    .get_repo()
+    .set_metadata(&app.package_name, &metadata)
+    .unwrap();
+
+  // get new metadata
+  let new_metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+
+  assert_eq!(metadata, new_metadata);
+}
