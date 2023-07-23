@@ -9,7 +9,6 @@ use log::debug;
 use std::collections::HashMap;
 
 // TODO: update general info
-// TODO: update store picture
 // TODO: build apps using fdroid import, build
 #[get("")]
 async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
