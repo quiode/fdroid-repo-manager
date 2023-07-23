@@ -74,6 +74,8 @@ impl Repository {
     self
       .run("init", &vec![])
       .expect("Failed to initialize the repository!");
+
+    self.update().expect("Failed to update the repository!");
   }
 
   /// Runs "fdroid update -c; fdroid update"
