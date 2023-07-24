@@ -21,7 +21,6 @@ mod utils;
 
 // TODO: refactor project structure and crate visibilities, maybe consider splitting into a library?
 // TODO: update README.md
-// TODO: improve logging -> more consistent
 
 #[get("/health")]
 async fn health() -> impl Responder {
