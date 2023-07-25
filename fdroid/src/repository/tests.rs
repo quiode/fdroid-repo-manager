@@ -1,4 +1,4 @@
-use crate::repository::tests::utils::*;
+use crate::repository::tests::utils::{get_repo_path, init_default, TestRepo};
 use itertools::Zip;
 use std::fs::File;
 use std::io::Read;
@@ -6,17 +6,12 @@ use std::io::Read;
 /// Test Utils
 mod utils {
   use crate::repository::Repository;
-  use actix_multipart::form::tempfile::TempFile;
-  use std::fs::File;
-  use std::io::{Read, Write};
   use std::{fs, path::PathBuf};
-  use tempfile::NamedTempFile;
   use uuid::Uuid;
 
   /// NewType for Repository struct
   /// Most important: Removes all files after being dropped
   pub struct TestRepo(Repository);
-  type TestApk = (String, PathBuf, File, TempFile);
 
   impl Drop for TestRepo {
     fn drop(&mut self) {
@@ -50,7 +45,7 @@ mod utils {
   }
 
   /// Returns a list of all available test apks
-  pub fn get_test_apks() -> Vec<TestApk> {
+  pub fn get_test_apks() -> Vec<PathBuf> {
     vec![
       "com.dede.android_eggs_28",
       "fr.ralala.hexviewer_142",
@@ -61,32 +56,14 @@ mod utils {
     .iter()
     .map(|name| {
       let file_path = get_repo_path().join(format!("../test-resources/{name}.apk"));
-      let file = File::open(&file_path).unwrap();
-      let temp_file = temp_file_from_file(file, name);
-      let file = File::open(&file_path).unwrap();
-      (name.to_string(), file_path, file, temp_file)
+      file_path
     })
     .collect()
   }
 
   /// Returns a single TestApk for testing
-  pub fn get_test_apk() -> TestApk {
+  pub fn get_test_apk() -> PathBuf {
     get_test_apks().pop().unwrap()
-  }
-
-  /// Creates a temp file from an file
-  pub fn temp_file_from_file(file: File, file_name: &str) -> TempFile {
-    let file_contents: Vec<u8> = file.bytes().map(|byte| byte.unwrap()).collect();
-    // create temp test file
-    let mut temp_test_file = NamedTempFile::new().unwrap();
-    temp_test_file.write_all(&file_contents).unwrap();
-
-    TempFile {
-      file: temp_test_file,
-      content_type: None,
-      file_name: Some(file_name.to_owned()),
-      size: 0,
-    }
   }
 
   /// Creates a new repo with one app uploaded
@@ -97,7 +74,7 @@ mod utils {
     let test_apk = get_test_apk();
 
     // sign app
-    repo.get_repo().sign_app(test_apk.3).unwrap();
+    repo.get_repo().sign_app(&test_apk).unwrap();
     repo
   }
 }
@@ -215,12 +192,10 @@ fn image_upload() {
   let image_path = get_repo_path()
     .join("../test-resources")
     .join(test_image_name);
-  let image = File::open(image_path.clone()).unwrap();
-  let tmp_image = temp_file_from_file(image, test_image_name);
-  let mut image = File::open(image_path).unwrap();
+  let mut image = File::open(&image_path).unwrap();
 
   // upload new image
-  repo.get_repo().save_image(tmp_image).unwrap();
+  repo.get_repo().save_image(&image_path).unwrap();
 
   // get uploaded image
   let mut uploaded_image = File::open(repo.get_repo().get_image_path().unwrap()).unwrap();

@@ -585,20 +585,6 @@ checksum = "6999dc1837253364c2ebb0704ba97994bd874e8f195d665c50b7548f6ea92764"
 name = "fdroid"
 version = "0.1.0"
 dependencies = [
- "actix-web",
- "pretty_assertions",
- "serde",
- "serde_yaml",
-]
-
-[[package]]
-name = "fdroid-repo-manager"
-version = "0.1.0"
-dependencies = [
- "actix-files",
- "actix-multipart",
- "actix-web",
- "env_logger",
  "itertools",
  "log",
  "pretty_assertions",
@@ -606,9 +592,12 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
- "tempfile",
  "uuid",
 ]
+
+[[package]]
+name = "fdroid-repo-manager"
+version = "0.1.0"
 
 [[package]]
 name = "flate2"

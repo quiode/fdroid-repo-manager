@@ -1,10 +1,13 @@
 //! Route used to edit the config.yml file#[get("")]
 
 use super::FileUploadForm;
-use crate::repository::{config::PublicConfig, Repository};
+use crate::utils::error::Result;
+use crate::utils::persist_temp_file;
 use actix_multipart::form::MultipartForm;
 use actix_web::web::Json;
-use actix_web::{get, post, web, HttpRequest, Responder, Result};
+use actix_web::{get, post, web, HttpRequest, Responder};
+use fdroid::repository::config::PublicConfig;
+use fdroid::repository::Repository;
 use log::debug;
 use std::collections::HashMap;
 
@@ -54,7 +57,8 @@ async fn upload_picture(
   repo: web::Data<Repository>,
   form: MultipartForm<FileUploadForm>,
 ) -> Result<impl Responder> {
-  repo.save_image(form.0.app)?;
+  let file_path = persist_temp_file(form.0.app)?;
+  repo.save_image(&file_path)?;
 
   Ok("")
 }

@@ -3,9 +3,8 @@ use actix_multipart::form::MultipartFormConfig;
 use actix_web::middleware;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use env_logger::Env;
+use fdroid::repository::Repository;
 use log::{debug, info};
-
-use repository::Repository;
 
 use crate::guards::auth_guard::AuthGuard;
 use crate::routes::app::*;
@@ -15,7 +14,6 @@ use crate::routes::config::{
 use crate::utils::app_config::{AppConfig, WrappedValue};
 
 mod guards;
-mod repository;
 mod routes;
 mod utils;
 

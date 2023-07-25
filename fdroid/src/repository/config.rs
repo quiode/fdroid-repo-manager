@@ -1,14 +1,11 @@
 //! Extension of Repository used to modify the config file
 
-use actix_multipart::form::tempfile::TempFile;
 use log::debug;
 use std::fs;
 use std::path::PathBuf;
 
+use crate::error::{Error, Result};
 use serde::{Deserialize, Serialize};
-
-use crate::utils::error::{Error, Result};
-use crate::utils::general::get_file_extension;
 
 use super::Repository;
 
@@ -127,37 +124,28 @@ impl Repository {
   }
 
   /// Saves the store image
-  pub fn save_image(&self, image: TempFile) -> Result<()> {
+  pub fn save_image(&self, new_image_path: &PathBuf) -> Result<()> {
     debug!("Saving to repository image!");
 
     let image_path = self.get_image_path()?;
 
     // check if it is the same image type
-    let new_image_type = get_file_extension(
-      &image
-        .file_name
-        .clone()
-        .ok_or(Error::User("Image does not have a file name!".to_owned()))?,
-    )
-    .ok_or(Error::User(
-      "The image does not have an extension!".to_owned(),
+    let new_image_type = new_image_path
+      .extension()
+      .ok_or(Error::User("Image does not have a file type!".to_owned()))?;
+    let current_image_type = image_path.extension().ok_or(Error::Custom(
+      "Current Image does not have a file name!".to_owned(),
     ))?;
-
-    let current_image_type = get_file_extension(
-      image_path
-        .to_str()
-        .ok_or(Error::User("Current image path is invalid!".to_owned()))?,
-    )
-    .ok_or(Error::User("Image does not have a file name!".to_owned()))?;
 
     // if image types are not the same, throw an error
     if new_image_type != current_image_type {
       Err(Error::User(
-        format!("Image type should be: {}", current_image_type).to_string(),
+        format!("Image type should be: {:?}", current_image_type).to_string(),
       ))
     } else {
       // safe the image
-      self.persist_temp_file(image, image_path)?;
+      fs::copy(new_image_path, &image_path)?;
+      fs::remove_file(new_image_path)?;
 
       Ok(())
     }

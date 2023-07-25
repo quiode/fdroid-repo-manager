@@ -1,4 +1,3 @@
-use actix_web::{http::StatusCode, ResponseError};
 use core::fmt;
 use std::{error, io};
 
@@ -49,18 +48,5 @@ impl From<io::Error> for Error {
 impl From<serde_yaml::Error> for Error {
   fn from(error: serde_yaml::Error) -> Self {
     Self::YAMLConvert(error)
-  }
-}
-
-#[cfg(feature = "actix")]
-impl ResponseError for Error {
-  fn status_code(&self) -> StatusCode {
-    match self {
-      Error::File(err) => err.status_code(),
-      Error::YAMLConvert(_) => StatusCode::INTERNAL_SERVER_ERROR,
-      Error::JsonConvert(_) => StatusCode::INTERNAL_SERVER_ERROR,
-      Error::Custom(_) => StatusCode::INTERNAL_SERVER_ERROR,
-      Error::User(_) => StatusCode::BAD_REQUEST,
-    }
   }
 }

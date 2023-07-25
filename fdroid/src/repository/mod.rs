@@ -1,8 +1,7 @@
 use std::{fs, path::PathBuf, process::Command};
 
+use crate::error::*;
 use log::{debug, info, warn};
-
-use crate::utils::error::{Error, Result};
 
 pub mod app;
 pub mod app_metadata;

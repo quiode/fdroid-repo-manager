@@ -1,17 +1,14 @@
+use std::path::PathBuf;
 use std::{
   fs::{self, File},
-  io::{self, Read},
-  path::PathBuf,
+  io::Read,
 };
 
-use actix_multipart::form::tempfile::TempFile;
 use log::{info, warn};
 use serde::Serialize;
 
-use crate::utils::{
-  aapt::{get_apk_info, get_name, get_version_code},
-  error::{Error, Result},
-};
+use crate::aapt::*;
+use crate::error::*;
 
 use super::Repository;
 
@@ -218,12 +215,11 @@ impl Repository {
   }
 
   /// Uploads a file directly to the app repository
-  pub fn upload_app(&self, file: TempFile) -> Result<()> {
+  pub fn upload_app(&self, file_path: &PathBuf) -> Result<()> {
     // save file
     let new_file_path = self.get_repo_path().join(
-      file
-        .file_name
-        .as_ref()
+      file_path
+        .file_name()
         .ok_or(Error::User("File has no name!".to_owned()))?,
     );
 
@@ -235,7 +231,8 @@ impl Repository {
       );
     }
 
-    self.persist_temp_file(file, new_file_path.clone())?;
+    fs::copy(file_path, &new_file_path)?;
+    fs::remove_file(file_path)?;
 
     // update meta data
     let update_result = self.update();
@@ -276,19 +273,21 @@ impl Repository {
   /// - parses apk metadata
   /// - Uploads apk to unsigned folder
   /// - signs apk
-  pub fn sign_app(&self, file: TempFile) -> Result<()> {
+  pub fn sign_app(&self, file_path: &PathBuf) -> Result<()> {
     // get apk metadata
-    let apk_metadata = get_apk_info(&file.file.path().to_owned())?;
+    let apk_metadata = get_apk_info(file_path)?;
 
     // get version and name
     let apk_version = get_version_code(&apk_metadata)?;
     let apk_name = get_name(&apk_metadata)?;
 
     // Upload apk to unsigned folder
-    let file_path = self
+    let new_file_path = self
       .get_unsigned_path()?
       .join(format!("{}_{}.apk", apk_name, apk_version));
-    self.persist_temp_file(file, file_path.clone())?;
+
+    fs::copy(file_path, &new_file_path)?;
+    fs::remove_file(file_path)?;
 
     // check if metadata exists
     let metadata = self.get_metadata(&apk_name);
@@ -304,40 +303,5 @@ impl Repository {
     self.update()?;
 
     Ok(())
-  }
-
-  /// Saves a temporary file to a final location
-  ///
-  /// Needed because file.persist() throws error if the destination directory is mounted inside a docker container
-  pub fn persist_temp_file(&self, file: TempFile, path: PathBuf) -> Result<File> {
-    // create temporary directory
-    let temp_dir_path = PathBuf::from("/tmp/files");
-    if !temp_dir_path.exists() {
-      fs::create_dir_all(temp_dir_path.clone())?;
-    }
-
-    // save file to temporary directory
-    let persistent_temp_file_path = temp_dir_path.join(
-      path
-        .file_name()
-        .ok_or(Error::User("File Name not provided!".to_owned()))?,
-    );
-
-    // persist file to temporary location
-    file
-      .file
-      .persist(persistent_temp_file_path.clone())
-      .map_err(io::Error::from)?;
-
-    // copy file
-    let file_copy_result = fs::copy(persistent_temp_file_path.clone(), path.clone()).map(|_| ());
-
-    // remove old file
-    fs::remove_file(persistent_temp_file_path)?;
-
-    // if copy operation was unsucessful, return here
-    file_copy_result?;
-
-    File::open(path).map_err(Error::from)
   }
 }

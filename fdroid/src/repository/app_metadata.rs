@@ -4,7 +4,7 @@ use std::{fs, fs::File, io::Read};
 use log::{debug, warn};
 use serde::{Deserialize, Serialize};
 
-use crate::utils::error::{Error, Result};
+use crate::error::*;
 
 use super::Repository;
 

@@ -4,13 +4,15 @@ use actix_multipart::form::MultipartForm;
 use actix_web::{
   delete, get, post, put,
   web::{self, Json},
-  Responder, Result,
+  Responder,
 };
+use fdroid::repository::app_metadata::AppMetadata;
+use fdroid::repository::Repository;
 use log::{debug, info};
 
 use super::FileUploadForm;
-use crate::repository::app_metadata::AppMetadata;
-use crate::repository::Repository;
+use crate::utils::error::Result;
+use crate::utils::persist_temp_file;
 
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
@@ -27,7 +29,8 @@ async fn upload_app(
   let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
   info!("Uploading a new app: \"{}\"...", file_name);
 
-  repo.upload_app(form.0.app)?;
+  let file_path = persist_temp_file(form.0.app)?;
+  repo.upload_app(&file_path)?;
 
   debug!("Finished uploading app: \"{}\"!", file_name);
   Ok("")
@@ -42,7 +45,8 @@ async fn sign_app(
   let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
   info!("Uploading and Signing a new app: \"{}\"", file_name);
 
-  repo.sign_app(form.0.app)?;
+  let file_path = persist_temp_file(form.0.app)?;
+  repo.sign_app(&file_path)?;
 
   Ok("")
 }

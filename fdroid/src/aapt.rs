@@ -4,7 +4,7 @@ use std::{path::PathBuf, process::Command};
 
 use regex::Regex;
 
-use super::error::{Error, Result};
+use crate::error::{Error, Result};
 
 /// Returns metadata of an apk as a string
 ///
