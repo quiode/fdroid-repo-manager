@@ -21,7 +21,6 @@ mod guards;
 mod routes;
 mod utils;
 
-// TODO: refactor project structure and crate visibilities, maybe consider splitting into a library?
 // TODO: update README.md
 
 #[get("/health")]
