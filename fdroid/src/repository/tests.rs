@@ -41,7 +41,9 @@ mod utils {
 
   /// Returns the main path for test repos
   pub fn get_repo_path() -> PathBuf {
-    PathBuf::from("developement/tests").canonicalize().unwrap()
+    PathBuf::from("../developement/tests")
+      .canonicalize()
+      .unwrap()
   }
 
   /// Returns a list of all available test apks
