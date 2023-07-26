@@ -232,7 +232,6 @@ impl Repository {
     }
 
     fs::copy(file_path, &new_file_path)?;
-    fs::remove_file(file_path)?;
 
     // update meta data
     let update_result = self.update();
@@ -287,7 +286,6 @@ impl Repository {
       .join(format!("{}_{}.apk", apk_name, apk_version));
 
     fs::copy(file_path, &new_file_path)?;
-    fs::remove_file(file_path)?;
 
     // check if metadata exists
     let metadata = self.get_metadata(&apk_name);

@@ -145,7 +145,6 @@ impl Repository {
     } else {
       // safe the image
       fs::copy(new_image_path, &image_path)?;
-      fs::remove_file(new_image_path)?;
 
       Ok(())
     }
