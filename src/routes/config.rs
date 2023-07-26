@@ -10,6 +10,7 @@ use fdroid::repository::config::PublicConfig;
 use fdroid::repository::Repository;
 use log::debug;
 use std::collections::HashMap;
+use std::fs;
 
 // TODO: update general info
 // TODO: build apps using fdroid import, build
@@ -59,6 +60,7 @@ async fn upload_picture(
 ) -> Result<impl Responder> {
   let file_path = persist_temp_file(form.0.app)?;
   repo.save_image(&file_path)?;
+  fs::remove_file(file_path)?;
 
   Ok("")
 }
@@ -68,7 +70,7 @@ async fn upload_picture(
 async fn get_picture(request: HttpRequest, repo: web::Data<Repository>) -> Result<impl Responder> {
   debug!("Downloading Image!");
 
-  let keystore = actix_files::NamedFile::open_async(repo.get_image_path()?).await?;
+  let image = actix_files::NamedFile::open_async(repo.get_image_path()?).await?;
 
-  Ok(keystore.into_response(&request))
+  Ok(image.into_response(&request))
 }

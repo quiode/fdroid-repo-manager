@@ -12,6 +12,7 @@ use actix_web::{
 use fdroid::repository::app_metadata::AppMetadata;
 use fdroid::repository::Repository;
 use log::{debug, info};
+use std::fs;
 
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
@@ -30,6 +31,7 @@ async fn upload_app(
 
   let file_path = persist_temp_file(form.0.app)?;
   repo.upload_app(&file_path)?;
+  fs::remove_file(file_path)?;
 
   debug!("Finished uploading app: \"{}\"!", file_name);
   Ok("")
@@ -46,6 +48,7 @@ async fn sign_app(
 
   let file_path = persist_temp_file(form.0.app)?;
   repo.sign_app(&file_path)?;
+  fs::remove_file(file_path)?;
 
   Ok("")
 }
