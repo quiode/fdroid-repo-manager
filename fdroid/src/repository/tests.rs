@@ -41,7 +41,7 @@ mod utils {
 
   /// Returns the main path for test repos
   pub fn get_repo_path() -> PathBuf {
-    PathBuf::from("../developement/tests")
+    PathBuf::from("../development/tests")
       .canonicalize()
       .unwrap()
   }

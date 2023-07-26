@@ -10,11 +10,11 @@
     <option name="buildTarget" value="REMOTE" />
     <option name="backtrace" value="SHORT" />
     <envs>
+      <env name="ANDROID_HOME" value="/opt/android-sdk" />
       <env name="RM_IP" value="127.0.0.1" />
       <env name="RM_PORT" value="8080" />
-      <env name="RM_REPO_PATH" value="$PROJECT_DIR$/developement/fdroid" />
+      <env name="RM_REPO_PATH" value="$PROJECT_DIR$/development/fdroid" />
       <env name="RUST_LOG" value="DEBUG" />
-      <env name="ANDROID_HOME" value="/opt/android-sdk" />
     </envs>
     <option name="isRedirectInput" value="false" />
     <option name="redirectInputPath" value="" />
