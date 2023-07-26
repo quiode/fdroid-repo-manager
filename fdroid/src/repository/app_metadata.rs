@@ -177,12 +177,12 @@ pub enum AndroidUpdate {
 impl Repository {
   /// gets the file path of an metadata file
   fn get_meta_file_path(&self, package_name: &str) -> PathBuf {
-    self.get_metadata_path().join(format!("{package_name}.yml"))
+    self.metadata_path().join(format!("{package_name}.yml"))
   }
 
   /// creates the metadata dir if it does not exist
   fn create_metadata_dir(&self) -> Result<()> {
-    let metadata_path = self.get_metadata_path();
+    let metadata_path = self.metadata_path();
 
     if !metadata_path.exists() {
       fs::create_dir_all(metadata_path)?;

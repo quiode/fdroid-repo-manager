@@ -44,6 +44,7 @@ pub fn get_version_code(metadata: &str) -> Result<u32> {
     .parse()
     .map_err(|_| Error::Custom("versionCode is not a valid number!".to_owned()))
 }
+
 /// gets the name from an apk metadata string
 pub fn get_name(metadata: &str) -> Result<String> {
   let regex = Regex::new(r"name='((?:[[:alpha:]]|\.)+)'").unwrap();

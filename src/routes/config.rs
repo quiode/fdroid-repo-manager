@@ -6,8 +6,7 @@ use crate::utils::persist_temp_file;
 use actix_multipart::form::MultipartForm;
 use actix_web::web::Json;
 use actix_web::{get, post, web, HttpRequest, Responder};
-use fdroid::repository::config::PublicConfig;
-use fdroid::repository::Repository;
+use fdroid::repository::{PublicConfig, Repository};
 use log::debug;
 use std::collections::HashMap;
 use std::fs;
@@ -36,7 +35,7 @@ async fn post_config(
 async fn get_keystore(request: HttpRequest, repo: web::Data<Repository>) -> Result<impl Responder> {
   debug!("Downloading keystore!");
 
-  let keystore = actix_files::NamedFile::open_async(repo.get_keystore_path()).await?;
+  let keystore = actix_files::NamedFile::open_async(repo.keystore_path()).await?;
 
   Ok(keystore.into_response(&request))
 }

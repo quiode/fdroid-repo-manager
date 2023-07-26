@@ -157,12 +157,12 @@ impl Repository {
       .repo_icon
       .unwrap_or("icon.png".to_owned());
 
-    Ok(self.get_repo_path().join("icons").join(image_name))
+    Ok(self.repo_path().join("icons").join(image_name))
   }
 
   /// Get Config File as it is
   fn get_config(&self) -> Result<ConfigFile> {
-    let yml_string = fs::read_to_string(self.get_config_path())?;
+    let yml_string = fs::read_to_string(self.config_path())?;
 
     serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from)
   }
@@ -173,7 +173,7 @@ impl Repository {
     let yml_string = serde_yaml::to_string(config_file)?;
 
     // write to file
-    fs::write(self.get_config_path(), yml_string)?;
+    fs::write(self.config_path(), yml_string)?;
 
     // update repository
     self.update()

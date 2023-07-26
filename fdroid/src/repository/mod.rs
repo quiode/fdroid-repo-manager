@@ -3,12 +3,25 @@ use std::{fs, path::PathBuf, process::Command};
 use crate::error::*;
 use log::{debug, info, warn};
 
-pub mod app;
-pub mod app_metadata;
-pub mod config;
 #[cfg(test)]
 mod tests;
 
+mod app;
+mod app_metadata;
+mod config;
+mod paths;
+
+// Re-Export
+pub use app::*;
+pub use app_metadata::*;
+pub use config::*;
+pub use paths::*;
+
+/// The main struct of this crate.
+///
+/// It provides different helper functions to work with an [fdroid](https://f-droid.org/en/docs/) repository.
+///
+/// Create a new instance by running [`Repository::new`] and providing the path to the repository.
 #[derive(Debug, Clone)]
 pub struct Repository {
   /// absolute path of the /fdroid repository
@@ -16,80 +29,110 @@ pub struct Repository {
 }
 
 impl Repository {
-  /// get path to the config.yml file
-  fn get_config_path(&self) -> PathBuf {
-    self.path.join("config.yml")
-  }
-
-  /// get the path of the metadata directory
-  fn get_metadata_path(&self) -> PathBuf {
-    self.path.join("metadata")
-  }
-
-  /// gets the path to the unsigned files
+  /// Opens an existing [`Repository`] or creates a new one.
+  /// The provided path is the directory, in which the fdroid repository will reside in.
   ///
-  /// also creates the directory if it does not already exist
-  fn get_unsigned_path(&self) -> Result<PathBuf> {
-    let path = self.path.join("unsigned");
-
-    // check if path is valid (could be invalid)
-    if path.exists() {
-      if path.is_dir() {
-        Ok(path)
-      } else {
-        Err(Error::User("unsigned directory is a file!".to_owned()))
-      }
-    } else {
-      fs::create_dir(path.clone())?;
-      Ok(path)
+  /// This function checks if the config file in [`Repository::config_path`] exists.
+  /// If it does, it assumes an fdroid repository also exists.
+  ///
+  /// If no file is found, this function will initialize a new fdroid repository in the provided path
+  /// by running [`Repository::initialize`].
+  ///
+  /// # Errors
+  ///
+  /// This function can return an error if:
+  /// - the provided path is not a directory
+  /// - initialization fails
+  /// - updating the repository fails
+  pub fn new(path: PathBuf) -> Result<Self> {
+    if !path.is_dir() {
+      return Err(Error::NotADirectory(path));
     }
-  }
 
-  // Create a new repository with the provided path
-  // returns the path to the app repository
-  pub fn get_repo_path(&self) -> PathBuf {
-    self.path.join("repo")
-  }
-
-  /// Runs fdroid init if config.yml misses
-  pub fn new(path: PathBuf) -> Self {
     let repository = Self { path };
 
     // check if config.yml exists
-    if repository.get_config_path().exists() {
-      repository
-    } else {
+    if !(repository.config_path().exists()) {
       // initialize directory
-      repository.initialize();
-
-      repository
+      repository.initialize()?;
     }
+
+    Ok(repository)
   }
 
-  /// Initializes a new repository by calling fdroid init
-  fn initialize(&self) {
+  /// Initializes a new repository
+  ///
+  /// # Error
+  /// Returns an error if the command fails
+  ///
+  /// Runs "`fdroid init`"
+  pub fn initialize(&self) -> Result<()> {
     info!("Initializing a new fdroid repository!");
 
-    self
-      .run("init", &vec![])
-      .expect("Failed to initialize the repository!");
+    self.run("init", &vec![]).map_err(|_| Error::Init)?;
 
-    self.update().expect("Failed to update the repository!");
+    self.update()
   }
 
-  /// Runs "fdroid update -c; fdroid update"
-  fn update(&self) -> Result<()> {
+  /// Updates the repository
+  ///
+  /// Gets automatically called after every apk upload, metadata change, image upload, etc.
+  /// and therefore **should never have to be called manually**.
+  ///
+  /// Runs "`fdroid update -c; fdroid update`"
+  ///
+  /// See [documentation](https://f-droid.org/en/docs/Setup_an_F-Droid_App_Repo/)
+  pub fn update(&self) -> Result<()> {
     debug!("Updating Repository (Running fdroid update -c; fdroid update)");
 
-    self.run("update", &vec!["-c"])?;
-    self.run("update", &vec![])
+    self.run("update", &vec!["-c"]).map_err(|_| Error::Update)?;
+    self.run("update", &vec![]).map_err(|_| Error::Update)
   }
 
   /// Runs "fdroid publish"
-  fn publish(&self) -> Result<()> {
+  pub fn publish(&self) -> Result<()> {
     debug!("Running fdroid publish");
 
     self.run("publish", &vec![])
+  }
+
+  /// Deletes **all** apps and metadata (but keeps everything else)
+  ///
+  /// # Warning
+  /// This function will permanently delete **ALL** files inside [`Repository::repo_path`] and [`Repository::metadata_path`]
+  ///
+  /// # Error
+  /// Will return an error if:
+  /// - removing/creating the directories fails
+  /// - updating fails
+  pub fn clear(&self) -> Result<()> {
+    warn!("Clearing the repository!");
+
+    // Delete all apps
+    fs::remove_dir_all(self.repo_path())?;
+    // Create directory again
+    fs::create_dir(self.repo_path())?;
+
+    // Delete all metadata files
+    fs::remove_dir_all(self.metadata_path())?;
+    // Create metadata directory
+    fs::create_dir(self.metadata_path())?;
+
+    // update index files etc
+    self.update()
+  }
+
+  /// Cleans up metadata files but **does not** modify their data
+  ///
+  /// This function only prettifies the metadata files and does nothing else.
+  ///
+  /// It maybe has to be called if fields are missing inside the metadata files as this function also
+  /// creates missing fields.
+  ///
+  /// Runs "`fdroid rewritemeta`"
+  pub fn cleanup(&self) -> Result<()> {
+    debug!("Cleaning up metadata files!");
+    self.run("rewritemeta", &vec![])
   }
 
   /// Runs an fdroid command with the specified arguments
@@ -114,42 +157,16 @@ impl Repository {
           .ok()
       });
 
-    let error_message =
-      format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
-
     if run_result.is_none() {
+      let error_message =
+        format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
       warn!("{}", error_message);
     }
 
-    run_result.map(|_| ()).ok_or(Error::Custom(error_message))
-  }
-
-  /// Deletes all apps and metadata (but keeps everything else)
-  pub fn clear(&self) -> Result<()> {
-    warn!("Clearing the repository!");
-
-    // Delete all apps
-    fs::remove_dir_all(self.get_repo_path())?;
-    // Create directory again
-    fs::create_dir(self.get_repo_path())?;
-
-    // Delete all metadata files
-    fs::remove_dir_all(self.get_metadata_path())?;
-    // Create metadata directory
-    fs::create_dir(self.get_metadata_path())?;
-
-    // update index files etc
-    self.update()
-  }
-
-  /// Runs "fdroid rewritemeta"
-  pub fn cleanup(&self) -> Result<()> {
-    debug!("Cleaning up metadata files!");
-    self.run("rewritemeta", &vec![])
-  }
-
-  /// Returns the path to the keystore file
-  pub fn get_keystore_path(&self) -> PathBuf {
-    self.path.join("keystore.p12")
+    run_result.map(|_| ()).ok_or(Error::Run(
+      format!("fdroid {command} {}", args.join(" "))
+        .trim()
+        .to_string(),
+    ))
   }
 }
