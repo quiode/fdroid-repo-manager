@@ -10,10 +10,6 @@ use fdroid::repository::app_metadata::AppMetadata;
 use fdroid::repository::Repository;
 use log::{debug, info};
 
-use super::FileUploadForm;
-use crate::utils::error::Result;
-use crate::utils::persist_temp_file;
-
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
   let apps = repo.get_apps()?;

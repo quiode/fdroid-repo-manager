@@ -1,8 +1,10 @@
-use self::Error::*;
-use actix_web::http::StatusCode;
-use actix_web::ResponseError;
 use std::fmt::{Display, Formatter};
 use std::io;
+
+use actix_web::http::StatusCode;
+use actix_web::ResponseError;
+
+use self::Error::*;
 
 #[derive(Debug, Clone)]
 pub enum Error {

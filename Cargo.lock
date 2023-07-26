@@ -598,6 +598,14 @@ dependencies = [
 [[package]]
 name = "fdroid-repo-manager"
 version = "0.1.0"
+dependencies = [
+ "actix-files",
+ "actix-multipart",
+ "actix-web",
+ "env_logger",
+ "fdroid",
+ "log",
+]
 
 [[package]]
 name = "flate2"
@@ -1214,18 +1222,6 @@ dependencies = [
  "ryu",
  "serde",
  "unsafe-libyaml",
-]
-
-[[package]]
-name = "service"
-version = "0.1.0"
-dependencies = [
- "actix-files",
- "actix-multipart",
- "actix-web",
- "env_logger",
- "fdroid",
- "log",
 ]
 
 [[package]]

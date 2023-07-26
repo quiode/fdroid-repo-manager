@@ -1,7 +1,7 @@
-use actix_multipart::form::tempfile::TempFile;
 use std::fs;
 use std::path::PathBuf;
 
+use actix_multipart::form::tempfile::TempFile;
 use error::*;
 
 pub mod app_config;
