@@ -7,6 +7,7 @@ use actix_web::ResponseError;
 use self::Error::*;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum Error {
   UserError(String),
   UnexpectedError(String),
