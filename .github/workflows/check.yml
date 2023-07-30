@@ -18,4 +18,4 @@ jobs:
     - name: Cargo Check
       run: cargo check --all
     - name: Cargo Clippy
-      run: cargo clippy --all
+      run: cargo clippy --all -- -D warnings
