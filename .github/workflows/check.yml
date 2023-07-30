@@ -11,12 +11,11 @@ env:
 
 jobs:
   check:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: Check
+    - name: Cargo Check
       run: cargo check --all
-    - name: Clippy
+    - name: Cargo Clippy
       run: cargo clippy --all
