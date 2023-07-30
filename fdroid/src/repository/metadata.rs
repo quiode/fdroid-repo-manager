@@ -80,15 +80,15 @@ pub struct AppMetadata {
   ///
   /// See [Donate](https://f-droid.org/en/docs/Build_Metadata_Reference/#Donate)
   pub Donate: Option<String>,
-  /// The project’s Flattr (https://flattr.com) ID, if it has one. This should be a numeric ID, such that (for example) https://flattr.com/thing/xxxx leads directly to the page to donate to the project.
+  /// The project’s Flattr (<https://flattr.com>) ID, if it has one. This should be a numeric ID, such that (for example) <https://flattr.com/thing/xxxx> leads directly to the page to donate to the project.
   ///
   /// See [FlattrID](https://f-droid.org/en/docs/Build_Metadata_Reference/#FlattrID)
   pub FlattrID: Option<String>,
-  /// The project’s Liberapay (https://liberapay.com) user or group name, if it has one. This should be an alphanumeric name, such that (for example) https://liberapay.com/xxxxx which redirects to your account page. This used to be LiberapayID, which was a numeric ID fetched from Liberapay’s site by adding /public.json behind your team page.
+  /// The project’s Liberapay (<https://liberapay.com>) user or group name, if it has one. This should be an alphanumeric name, such that (for example) <https://liberapay.com/xxxxx> which redirects to your account page. This used to be LiberapayID, which was a numeric ID fetched from Liberapay’s site by adding /public.json behind your team page.
   ///
   /// See [Liberapay](https://f-droid.org/en/docs/Build_Metadata_Reference/#Liberapay)
   pub Liberapay: Option<String>,
-  /// The project’s OpenCollective (https://opencollective.com) user or group name, if it has one. This should be an alphanumeric name, such that (for example) https://opencollective.com/xxxxx redirects to your account page.
+  /// The project’s OpenCollective (<https://opencollective.com>) user or group name, if it has one. This should be an alphanumeric name, such that (for example) <https://opencollective.com/xxxxx> redirects to your account page.
   ///
   /// See [OpenCollective](https://f-droid.org/en/docs/Build_Metadata_Reference/#OpenCollective)
   pub OpenCollective: Option<String>,
@@ -136,7 +136,7 @@ pub struct AppMetadata {
   pub RepoType: Option<RepoType>,
   /// The repository location. Usually a git: or svn: URL, for example.
   ///
-  /// The git-svn option connects to an SVN repository, and you specify the URL in exactly the same way, but git is used as a back-end. This is preferable for performance reasons, and also because a local copy of the entire history is available in case the upstream repository disappears. (It happens!). In order to use Tags as UpdateCheckMode for this VCS type, the URL must have the tags= special argument set. Likewise, if you intend to use the RepoManifest/branch scheme, you would want to specify branches= as well. Finally, trunk= can also be added. All these special arguments will be passed to “git svn” in order, and their values must be relative paths to the svn repo root dir. Here’s an example of a complex git-svn Repo URL: http://svn.code.sf.net/p/project/code/svn;trunk=trunk;tags=tags;branches=branches
+  /// The git-svn option connects to an SVN repository, and you specify the URL in exactly the same way, but git is used as a back-end. This is preferable for performance reasons, and also because a local copy of the entire history is available in case the upstream repository disappears. (It happens!). In order to use Tags as UpdateCheckMode for this VCS type, the URL must have the tags= special argument set. Likewise, if you intend to use the RepoManifest/branch scheme, you would want to specify branches= as well. Finally, trunk= can also be added. All these special arguments will be passed to “git svn” in order, and their values must be relative paths to the svn repo root dir. Here’s an example of a complex git-svn Repo URL: <http://svn.code.sf.net/p/project/code/svn;trunk=trunk;tags=tags;branches=branches>
   ///
   /// If the RepoType is srclib, then you must specify the name of the according srclib .yml file. For example if srclibs/FooBar.yml exist and you want to use this srclib, then you have to set Repo to FooBar.
   ///
@@ -144,7 +144,7 @@ pub struct AppMetadata {
   pub Repo: Option<String>,
   /// The location of binaries used in verification process.
   ///
-  /// If specified, F-Droid will verify the output APK file of a build against the one specified. You can use %v and %c to point to the version name and version code of the current build. To verify the F-Droid client itself you could use: Binaries: https://f-droid.org/repo/org.fdroid.fdroid_%c.apk
+  /// If specified, F-Droid will verify the output APK file of a build against the one specified. You can use %v and %c to point to the version name and version code of the current build. To verify the F-Droid client itself you could use: Binaries: <https://f-droid.org/repo/org.fdroid.fdroid_%c.apk>
   ///
   /// F-Droid will use upstream binaries if the verification succeeded.
   ///
@@ -213,7 +213,7 @@ pub struct AppMetadata {
   pub UpdateCheckName: Option<String>,
   /// Used in conjunction with [UpdateCheckMode::Tags] or [UpdateCheckMode::Http].
   /// `UpdateCheckData: <vercode-location>|<RegEx-for-versionCode>|<versionName-location>|<RegEx-for-versionName>`
-  /// - `vercode-location` - URL (with [UpdateCheckMode:Http]) or path/file relative to repo root, leave empty to check the tag name instead (with UpdateCheckMode: Tags).
+  /// - `vercode-location` - URL (with [UpdateCheckMode::Http]) or path/file relative to repo root, leave empty to check the tag name instead (with UpdateCheckMode: Tags).
   /// - `RegEx-for-versionCode` - RegEx to match versionCode.
   /// - `versionName-location` - Same as vercode-location just for versionName. A . means to take vercode-location, leave empty to check the tag name instead (only with UpdateCheckMode: Tags).
   /// - `RegEx-for-versionName` - Similar to RegEx-for-versionCode, just for versionName.
@@ -234,9 +234,9 @@ pub struct AppMetadata {
   pub UpdateCheckData: Option<String>,
   /// This determines the method used for auto-generating new builds when new releases are available - in other words, adding a new Build Version line to the metadata. This happens in conjunction with the UpdateCheckMode functionality - i.e. when an update is detected by that, it is also processed by this.
   ///
-  /// If [UpdateCheckMode] is set to [UpdateCheckMode::Tags], this should be set to [Version] without any pattern. The checked tag is used directly.
+  /// If [UpdateCheckMode] is set to [UpdateCheckMode::Tags], this should be set to [AutoUpdateMode::Version] without any pattern. The checked tag is used directly.
   ///
-  ///If [UpdateCheckMode] is set to [UpdateCheckMode::Http], a pattern should be added after the [Version]. The pattern is used to generate a value (tag name) used for the commit: property of new build blocks. It is simply text in which %v and %c are replaced with the required version name and version code respectively. The resulting string must match an existing tag in the app’s repo, which then will be used by F-Droid to build the corresponding version.
+  ///If [UpdateCheckMode] is set to [UpdateCheckMode::Http], a pattern should be added after the [AutoUpdateMode::Version]. The pattern is used to generate a value (tag name) used for the commit: property of new build blocks. It is simply text in which %v and %c are replaced with the required version name and version code respectively. The resulting string must match an existing tag in the app’s repo, which then will be used by F-Droid to build the corresponding version.
   ///
   /// For example, if an app always has a tag 2.7.2 corresponding to version 2.7.2, you would simply specify Version %v. If an app always has a tag ver_1234 for a version with version code 1234, you would specify Version ver_%c.
   ///
@@ -321,7 +321,7 @@ pub struct Builds {
   pub forcevercode: Option<bool>,
   /// The location of a binary used in verification process for this build.
   ///
-  /// If specified, F-Droid will verify the output APK file of a build against the one specified. You can use %v and %c to point to the version name and version code of the current build. To verify the F-Droid client itself you could use: binary: https://f-droid.org/repo/org.fdroid.fdroid_%c.apk
+  /// If specified, F-Droid will verify the output APK file of a build against the one specified. You can use %v and %c to point to the version name and version code of the current build. To verify the F-Droid client itself you could use: binary: <https://f-droid.org/repo/org.fdroid.fdroid_%c.apk>
   ///
   /// F-Droid will use the upstream binary if the verification succeeded.
   pub binary: Option<String>,
@@ -379,7 +379,7 @@ pub struct Builds {
   ///
   /// If only one flavour is given and it is ‘yes’, no flavour will be used. Note that for projects with flavours, you must specify at least one valid flavour since ‘yes’ will build all of them separately.
   pub gradle: Option<Vec<String>>,
-  /// Build with Maven instead of Ant. An extra @<dir> tells F-Droid to run Maven inside that relative subdirectory. Sometimes it is needed to use @.. so that builds happen correctly.
+  /// Build with Maven instead of Ant. An extra @\<dir> tells F-Droid to run Maven inside that relative subdirectory. Sometimes it is needed to use @.. so that builds happen correctly.
   pub maven: Option<String>,
   /// List of Gradle tasks to be run before the assemble task in a Gradle project build.
   pub preassemble: Option<Vec<String>>,
