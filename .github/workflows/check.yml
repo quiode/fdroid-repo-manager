@@ -1,4 +1,4 @@
-ame: Rust-Check
+name: Rust-Check
 
 on:
   push:
