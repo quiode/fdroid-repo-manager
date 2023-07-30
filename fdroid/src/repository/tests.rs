@@ -37,7 +37,7 @@ mod utils {
       // create repo
       fs::create_dir_all(&repo_path).unwrap();
 
-      Self(Repository::new(repo_path))
+      Self(Repository::new(repo_path).unwrap())
     }
   }
 
