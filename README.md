@@ -1,13 +1,23 @@
 # Fdroid Repo Manager
 
+## Setup
+
+### Docker
+
 ## Environment Variables
 
-- RM_IP
-- RM_PORT
-- RM_REPO_PATH
-- RUST_LOG
-- RM_MAX_PAYLOAD_SIZE
-- ANDROID_HOME
+- RM_IP  
+IP Adress of the server
+- RM_PORT  
+Port of the server
+- RM_REPO_PATH  
+Path to the repository
+- RUST_LOG  
+Log level of the logger
+- RM_MAX_PAYLOAD_SIZE  
+Max Payload size (important for apk uploads)
+- ANDROID_HOME  
+path to the android sdk
 
 ## Development
 

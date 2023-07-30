@@ -22,7 +22,7 @@ mod routes;
 mod utils;
 
 // TODO: update README.md
-// TODO: ci integration workflow
+// TODO: ci integration workflow (how to use the backend to upload a new app from a ci)
 
 #[get("/health")]
 async fn health() -> impl Responder {
