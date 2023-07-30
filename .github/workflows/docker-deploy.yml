@@ -22,6 +22,8 @@ jobs:
       - name: Get Previous tag
         id: previoustag
         uses: "WyriHaximus/github-action-get-previous-tag@v0.3.5"
+        with:
+          prefix: v
       - name: "❓ Find the release semantic version"
         id: semver
         uses: Steffo99/actions-semver@v0.2.0
