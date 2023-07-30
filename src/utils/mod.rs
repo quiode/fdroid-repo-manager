@@ -23,11 +23,11 @@ pub fn persist_temp_file(temp_file: TempFile) -> Result<PathBuf> {
   let persistent_temp_file_path = temp_dir_path.join(
     temp_file
       .file_name
-      .ok_or(Error::UserError("File Name not provided!".to_owned()))?,
+      .ok_or(Error::User("File Name not provided!".to_owned()))?,
   );
 
   // persist file to temporary location
-  temp_file.file.persist(&persistent_temp_file_path).map_err(|_err| Error::UnexpectedError("An Error occurred while persisting a temporary file. Are you running this service inside a docker container?".to_string()))?;
+  temp_file.file.persist(&persistent_temp_file_path).map_err(|_err| Error::Unexpected("An Error occurred while persisting a temporary file. Are you running this service inside a docker container?".to_string()))?;
 
   Ok(persistent_temp_file_path)
 }
