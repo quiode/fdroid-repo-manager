@@ -11,7 +11,6 @@ use log::debug;
 use std::collections::HashMap;
 use std::fs;
 
-// TODO: update general info
 // TODO: build apps using fdroid import, build
 #[get("")]
 async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
