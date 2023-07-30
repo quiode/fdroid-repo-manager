@@ -1,11 +1,11 @@
-name: Create Tag
+name: Check Tag
 on:
   pull_request:
     branches:
       - "main"
 
 jobs:
-  create-tag:
+  check-tag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
