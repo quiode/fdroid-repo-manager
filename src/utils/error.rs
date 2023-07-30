@@ -31,8 +31,28 @@ impl From<fdroid::error::Error> for Error {
         "An Unexpected JSON-Convert Error occurred: {}",
         error.to_string()
       )),
-      fdroid::error::Error::Custom(message) => UnexpectedError(message),
-      fdroid::error::Error::User(message) => UserError(message),
+      fdroid::error::Error::InvalidFile(_) => UnexpectedError(format!(
+        "An Unexpected Invalid File Error occurred: {}",
+        value.to_string()
+      )),
+      fdroid::error::Error::NotAFile(_) => UnexpectedError(format!(
+        "An Unexpected Invalid File Error occurred: {}",
+        value.to_string()
+      )),
+      fdroid::error::Error::NotADirectory(_) => UnexpectedError(format!(
+        "An Unexpected Invalid Directory Error occurred: {}",
+        value.to_string()
+      )),
+      fdroid::error::Error::Init => UnexpectedError(format!(
+        "An error occurred while initializing the repository!"
+      )),
+      fdroid::error::Error::Update => {
+        UnexpectedError(format!("An error occurred while updating the repository!"))
+      }
+      fdroid::error::Error::Run(_) => UnexpectedError(format!(
+        "An error occurred while running a command: {}",
+        value.to_string()
+      )),
     }
   }
 }

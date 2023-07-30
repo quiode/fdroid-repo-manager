@@ -6,7 +6,7 @@ use crate::utils::persist_temp_file;
 use actix_multipart::form::MultipartForm;
 use actix_web::web::Json;
 use actix_web::{get, post, web, HttpRequest, Responder};
-use fdroid::repository::{Config, Repository};
+use fdroid::{Config, Repository};
 use log::debug;
 use std::collections::HashMap;
 use std::fs;

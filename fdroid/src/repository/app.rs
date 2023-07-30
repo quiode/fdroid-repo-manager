@@ -12,12 +12,11 @@ use std::{
   io::Read,
 };
 
-use log::{info, warn};
-use serde::Serialize;
-
 use crate::aapt::*;
 use crate::error::{Error, InvalidFile, Result};
 use crate::metadata::Category;
+use log::{info, warn};
+use serde::{Deserialize, Serialize};
 
 use super::Repository;
 
@@ -70,7 +69,10 @@ impl App {
 
       // get all categories (are saved in a map)
       for category in app.get("categories")?.as_array()? {
-        categories.push(category.as_str()?.to_string());
+        categories.push(
+          Category::deserialize(category)
+            .unwrap_or(Category::Custom(category.as_str()?.to_string())),
+        );
       }
 
       let mut packages_vec = vec![];

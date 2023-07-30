@@ -9,7 +9,8 @@ use actix_web::{
   web::{self, Json},
   Responder,
 };
-use fdroid::repository::{AppMetadata, Repository};
+use fdroid::metadata::AppMetadata;
+use fdroid::Repository;
 use log::{debug, info};
 use std::fs;
 
