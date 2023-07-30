@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Watch (doc)" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="command" value="watch -x doc" />
-    <option name="workingDirectory" value="file://$PROJECT_DIR$/fdroid" />
+  <configuration default="false" name="Test" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="test" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <option name="emulateTerminal" value="false" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />
