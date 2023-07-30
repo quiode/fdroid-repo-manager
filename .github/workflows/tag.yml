@@ -10,18 +10,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: git fetch --all --tags
-      - name: Check Release Version
+      - name: Get Crate Version
         uses: thebongy/version-check@v1
         id: version_get
         with:
           file: Cargo.toml
           tagFormat: v${version}
-      - uses: rickstaa/action-create-tag@v1
-        id: "tag_create"
+      - name: Create tag
+        uses: actions/github-script@v5
         with:
-          tag: "${{steps.version_get.outputs.releaseVersion}}"
-      - name: add tag
-        uses: laputansoft/github-tag-action@v4.6
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.version_get.outputs.releaseVersion }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/v${{ steps.version_get.outputs.releaseVersion }}',
+              sha: context.sha
+            })
