@@ -17,6 +17,7 @@ use serde::Serialize;
 
 use crate::aapt::*;
 use crate::error::{Error, InvalidFile, Result};
+use crate::metadata::Category;
 
 use super::Repository;
 
@@ -25,13 +26,23 @@ use super::Repository;
 /// Get a List of all Apps by calling [Repository::get_apps].
 #[derive(Clone, Serialize)]
 pub struct App {
+  /// the name of the package
   pub package_name: String,
-  pub categories: Vec<String>,
+  /// the categories of the package
+  ///
+  /// either a custom category or a category specified in [Category]
+  pub categories: Vec<Category>,
+  /// the suggested apk version to use
   pub suggested_version_code: String,
+  /// the license of the repository (MIT, GPL, etc.)
   pub license: String,
+  /// the name of the app
   pub name: String,
+  /// when the app was added
   pub added: i64,
+  /// when the app was last updated
   pub last_updated: i64,
+  /// a list of all packages
   pub packages: Vec<Package>,
 }
 

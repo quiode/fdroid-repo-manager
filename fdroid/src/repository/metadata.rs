@@ -18,7 +18,7 @@ pub struct AppMetadata {
   /// Any number of categories for the application to be placed in. There is no fixed list of categories - both the client and the web site will automatically show any categories that exist in any applications. However, if your metadata is intended for the main F-Droid repository, you should use one of the existing categories (Connectivity,Development, Games,Graphics,Internet,Money,Multimedia,Navigation,Phone & SMS, Reading,Science & Education,Security,Sports & Health,System,Theming, Time,Writing), or discuss the proposal to add a new one. Categories must be a list of items, even if there is just one.
   ///
   /// See [Categories](https://f-droid.org/en/docs/Build_Metadata_Reference/#Categories)
-  pub Categories: Option<Vec<Categories>>,
+  pub Categories: Option<Vec<Category>>,
   /// The name of the author, either full, abbreviated or pseudonym. If present, it should represent the name(s) as published by upstream, e.g. in their copyright or authors file. This can be omitted (or left blank).
   ///
   /// **Warning**: this overrides all AuthorName entries set in the app’s source code.
@@ -410,14 +410,14 @@ pub struct Builds {
 }
 
 /// The [Category](https://f-droid.org/en/docs/Build_Metadata_Reference/#Categories) of the package.
-/// Preferably a predefined category like [Categories::Games] or [Categories::Money], but can also
+/// Preferably a predefined category like [Category::Games] or [Category::Money], but can also
 /// be a custom Category (see [Categories::Custom(String)]).
 ///
 /// During Deserialization, if a categories does not match any category defined in the enum,
 /// it automatically gets assigned to [Categories::Custom(String)]
 #[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(untagged)]
-pub enum Categories {
+pub enum Category {
   Connectivity,
   Development,
   Games,
