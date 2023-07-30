@@ -26,7 +26,7 @@ jobs:
         id: semver
         uses: Steffo99/actions-semver@v0.2.0
         with:
-          string: ${{ steps.previoustag.outputs.tag }}
+          string: "${{ steps.previoustag.outputs.tag }}"
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
