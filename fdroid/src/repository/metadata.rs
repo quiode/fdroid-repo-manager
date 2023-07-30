@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::{fs, fs::File, io::Read};
 
-use log::{debug, warn};
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 
 use crate::error::*;
@@ -578,7 +578,6 @@ impl Repository {
   /// - throws an error if the data does not exist
   /// - throws an error if the file can't be mapped
   pub fn metadata(&self, package_name: &str) -> Result<AppMetadata> {
-    debug!("Getting metadata for {package_name}!");
     // get metadata file path
     let meta_file_path = self.package_metadata_path(package_name);
 
@@ -601,8 +600,7 @@ impl Repository {
   /// # Error
   /// Returns an error if the metadata can't be serialized
   pub fn set_metadata(&self, package_name: &str, metadata: &AppMetadata) -> Result<()> {
-    debug!("Writing new metadata for {package_name}!");
-    debug!("Metadata:\n{metadata:#?}");
+    info!("Setting new metadata for {package_name}!");
     // get metadata file path
     let meta_file_path = self.package_metadata_path(package_name);
 
@@ -615,6 +613,7 @@ impl Repository {
 
   /// Creates an empty metadata file (if none exist) and runs `fdroid rewritemeta`
   pub fn create_metadata(&self, package_name: &str) -> Result<()> {
+    info!("Creating an empty metadata file for: {package_name}");
     let file_path = self.package_metadata_path(package_name);
 
     if file_path.is_file() {

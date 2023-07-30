@@ -43,6 +43,9 @@
 //! For working with the repository itself
 //! - [android-sdk-build-tools](https://developer.android.com/tools/releases/build-tools)  
 //! Uses [aapt](https://elinux.org/Android_aapt) for extracting metadata from apks
+//!
+//! ## Logging
+//! This crate uses the [log crate](https://docs.rs/log/latest/log/) to log all **write** changes.
 
 mod aapt;
 pub mod error;

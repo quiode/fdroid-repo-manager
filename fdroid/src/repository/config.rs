@@ -1,6 +1,6 @@
 //! Extension of Repository used to modify the config file
 
-use log::debug;
+use log::info;
 use std::fs;
 use std::path::PathBuf;
 
@@ -113,6 +113,7 @@ impl Repository {
 
   /// saves the new configuration data
   pub fn set_config(&self, public_config: &Config) -> Result<()> {
+    info!("Setting new config!");
     let config_file = self.get_config()?;
 
     let merged_config = config_file.merge_with_public(public_config);
@@ -131,7 +132,7 @@ impl Repository {
 
   /// sets the store image
   pub fn set_image(&self, new_image_path: &PathBuf) -> Result<()> {
-    debug!("Saving to repository image!");
+    info!("Setting new repository image: {new_image_path:?}!");
 
     let image_path = self.image_path()?;
 

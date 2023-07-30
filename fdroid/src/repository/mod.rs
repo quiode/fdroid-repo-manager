@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf, process::Command};
 
 use crate::error::*;
-use log::{debug, info, warn};
+use log::{debug, error, info, warn};
 
 #[cfg(test)]
 mod tests;
@@ -66,7 +66,7 @@ impl Repository {
   ///
   /// Runs `fdroid init`
   pub fn initialize(&self) -> Result<()> {
-    info!("Initializing a new fdroid repository!");
+    info!("Initializing a new repository at {:?}!", self.path);
 
     self.run("init", &vec![]).map_err(|_| Error::Init)?;
 
@@ -82,7 +82,7 @@ impl Repository {
   ///
   /// See [documentation](https://f-droid.org/en/docs/Setup_an_F-Droid_App_Repo/)
   pub fn update(&self) -> Result<()> {
-    debug!("Updating Repository (Running fdroid update -c; fdroid update)");
+    info!("Updating Repository");
 
     self.run("update", &vec!["-c"]).map_err(|_| Error::Update)?;
     self.run("update", &vec![]).map_err(|_| Error::Update)
@@ -90,7 +90,7 @@ impl Repository {
 
   /// Runs `fdroid publish`
   pub fn publish(&self) -> Result<()> {
-    debug!("Running fdroid publish");
+    info!("Publishing Changes");
 
     self.run("publish", &vec![])
   }
@@ -136,6 +136,7 @@ impl Repository {
 
   /// Runs an fdroid command with the specified arguments
   fn run(&self, command: &str, args: &Vec<&str>) -> Result<()> {
+    info!("Running command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
     let run_result = Command::new("fdroid")
       .arg(command)
       .args(args)
@@ -159,7 +160,7 @@ impl Repository {
     if run_result.is_none() {
       let error_message =
         format!("Failed to run command: \"fdroid {command}\" with arguemnts: \"{args:#?}\"");
-      warn!("{}", error_message);
+      error!("{}", error_message);
     }
 
     run_result.map(|_| ()).ok_or(Error::Run(

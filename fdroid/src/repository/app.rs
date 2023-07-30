@@ -189,10 +189,7 @@ impl Package {
       ));
     }
 
-    let version_code = value
-      .get("versionCode")
-      .and_then(|val| val.as_u64())
-      .and_then(|val| val.try_into().ok());
+    let version_code = value.get("versionCode").and_then(|val| val.as_u64());
 
     Some(Self {
       added,
@@ -241,6 +238,7 @@ impl Repository {
 
   /// adds an app directly to the app repository
   pub fn add_app(&self, file_path: &PathBuf) -> Result<()> {
+    info!("Adding new app: {file_path:?}");
     // save file
     let new_file_path = self.repo_path().join(
       file_path
@@ -271,7 +269,7 @@ impl Repository {
 
   /// Deletes an apk (if it exists)
   pub fn delete_app(&self, apk_name: &str) -> Result<()> {
-    info!("Deleting \"{}\"", apk_name);
+    warn!("Deleting \"{apk_name}\"");
     let file_path = self.repo_path().join(apk_name);
 
     // check if file exists
@@ -298,6 +296,7 @@ impl Repository {
   /// - add apk to unsigned folder
   /// - signs apk
   pub fn sign_app(&self, file_path: &PathBuf) -> Result<()> {
+    info!("Singing {file_path:?}");
     // get apk metadata
     let apk_metadata = get_apk_info(file_path)?;
 
@@ -315,7 +314,7 @@ impl Repository {
       .unsigned_path()?
       .join(format!("{}_{}.apk", apk_name, apk_version));
 
-    fs::copy(file_path, &new_file_path)?;
+    fs::copy(file_path, new_file_path)?;
 
     // check if metadata exists
     let metadata = self.metadata(&apk_name);
