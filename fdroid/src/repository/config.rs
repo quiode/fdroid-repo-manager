@@ -1,14 +1,11 @@
 //! Extension of Repository used to modify the config file
 
-use actix_multipart::form::tempfile::TempFile;
-use log::debug;
+use log::info;
 use std::fs;
 use std::path::PathBuf;
 
+use crate::error::{Error, InvalidFile, Result};
 use serde::{Deserialize, Serialize};
-
-use crate::utils::error::{Error, Result};
-use crate::utils::general::get_file_extension;
 
 use super::Repository;
 
@@ -45,12 +42,11 @@ struct ConfigFile {
   archive_description: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
   archive_older: Option<u8>,
-  // TODO: update_stats
 }
 
 impl ConfigFile {
   /// Creates new ConfigFile with public fields
-  fn merge_with_public(&self, public: &PublicConfig) -> Self {
+  fn merge_with_public(&self, public: &Config) -> Self {
     Self {
       sdk_path: self.sdk_path.clone(),
       repo_keyalias: self.repo_keyalias.clone(),
@@ -72,9 +68,11 @@ impl ConfigFile {
   }
 }
 
-/// Part of the config file that can be changed
+/// Configuration Data for the [Repository]
+///
+/// Note: Some fields that exist in the actual file are hidden.
 #[derive(Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
-pub struct PublicConfig {
+pub struct Config {
   // repo
   pub repo_url: Option<String>,
   pub repo_name: Option<String>,
@@ -88,7 +86,7 @@ pub struct PublicConfig {
   pub archive_older: Option<u8>,
 }
 
-impl From<ConfigFile> for PublicConfig {
+impl From<ConfigFile> for Config {
   fn from(value: ConfigFile) -> Self {
     Self {
       repo_url: value.repo_url,
@@ -105,13 +103,17 @@ impl From<ConfigFile> for PublicConfig {
 }
 
 impl Repository {
-  /// Get Public Part of the Config File
-  pub fn get_public_config(&self) -> Result<PublicConfig> {
+  /// get configuration data about the repository
+  ///
+  /// # Error
+  /// Returns an error if the file can't be read or deserialized
+  pub fn config(&self) -> Result<Config> {
     self.get_config().map(|config| config.into())
   }
 
-  // Set Config (don't change private part of the config file)
-  pub fn set_config(&self, public_config: &PublicConfig) -> Result<()> {
+  /// saves the new configuration data
+  pub fn set_config(&self, public_config: &Config) -> Result<()> {
+    info!("Setting new config!");
     let config_file = self.get_config()?;
 
     let merged_config = config_file.merge_with_public(public_config);
@@ -120,62 +122,66 @@ impl Repository {
   }
 
   /// Returns the keystore password
-  pub fn get_keystore_password(&self) -> Result<String> {
+  ///
+  /// See [signing](https://f-droid.org/en/docs/Signing_Process/)
+  pub fn keystore_password(&self) -> Result<String> {
     let config_file = self.get_config()?;
 
     Ok(config_file.keystorepass)
   }
 
-  /// Saves the store image
-  pub fn save_image(&self, image: TempFile) -> Result<()> {
-    debug!("Saving to repository image!");
+  /// sets the store image
+  pub fn set_image(&self, new_image_path: &PathBuf) -> Result<()> {
+    info!("Setting new repository image: {new_image_path:?}!");
 
-    let image_path = self.get_image_path()?;
+    let image_path = self.image_path()?;
 
     // check if it is the same image type
-    let new_image_type = get_file_extension(
-      &image
-        .file_name
-        .clone()
-        .ok_or(Error::User("Image does not have a file name!".to_owned()))?,
-    )
-    .ok_or(Error::User(
-      "The image does not have an extension!".to_owned(),
-    ))?;
-
-    let current_image_type = get_file_extension(
+    let new_image_type =
+      new_image_path
+        .extension()
+        .ok_or(Error::InvalidFile(InvalidFile::with_reason(
+          new_image_path.clone(),
+          "Image does not have a file type",
+        )))?;
+    let current_image_type =
       image_path
-        .to_str()
-        .ok_or(Error::User("Current image path is invalid!".to_owned()))?,
-    )
-    .ok_or(Error::User("Image does not have a file name!".to_owned()))?;
+        .extension()
+        .ok_or(Error::InvalidFile(InvalidFile::with_reason(
+          new_image_path.clone(),
+          "Image does not have a file name",
+        )))?;
 
     // if image types are not the same, throw an error
     if new_image_type != current_image_type {
-      Err(Error::User(
-        format!("Image type should be: {}", current_image_type).to_string(),
-      ))
+      Err(Error::InvalidFile(InvalidFile::with_reason(
+        new_image_path.clone(),
+        &format!("Image type should be: {:?}", current_image_type),
+      )))
     } else {
       // safe the image
-      self.persist_temp_file(image, image_path)?;
+      fs::copy(new_image_path, &image_path)?;
 
       Ok(())
     }
   }
 
   /// Gets the path to the repository image
-  pub fn get_image_path(&self) -> Result<PathBuf> {
+  pub fn image_path(&self) -> Result<PathBuf> {
     let image_name = self
       .get_config()?
       .repo_icon
       .unwrap_or("icon.png".to_owned());
 
-    Ok(self.get_repo_path().join("icons").join(image_name))
+    Ok(self.repo_path().join("icons").join(image_name))
   }
 
-  /// Get Config File as it is
+  /// returns the private config file
+  ///
+  /// # Error
+  /// Returns an error if the file can't be read or deserialized
   fn get_config(&self) -> Result<ConfigFile> {
-    let yml_string = fs::read_to_string(self.get_config_path())?;
+    let yml_string = fs::read_to_string(self.config_path())?;
 
     serde_yaml::from_str::<ConfigFile>(&yml_string).map_err(Error::from)
   }
@@ -186,7 +192,7 @@ impl Repository {
     let yml_string = serde_yaml::to_string(config_file)?;
 
     // write to file
-    fs::write(self.get_config_path(), yml_string)?;
+    fs::write(self.config_path(), yml_string)?;
 
     // update repository
     self.update()

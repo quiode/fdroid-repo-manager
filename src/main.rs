@@ -1,26 +1,28 @@
-use actix_files as fs;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::middleware;
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use env_logger::Env;
 use log::{debug, info};
 
-use repository::Repository;
-
-use crate::guards::auth_guard::AuthGuard;
-use crate::routes::app::*;
 use crate::routes::config::{
   get_config, get_keystore, get_keystore_password, get_picture, post_config, upload_picture,
 };
+
+use crate::guards::auth_guard::AuthGuard;
+use crate::routes::app::{
+  cleanup_files, delete_all, delete_app, get_apps, get_metadata, sign_app, update_metadata,
+  upload_app,
+};
 use crate::utils::app_config::{AppConfig, WrappedValue};
+use actix_files as fs;
+use fdroid::Repository;
 
 mod guards;
-mod repository;
 mod routes;
 mod utils;
 
-// TODO: refactor project structure and crate visibilities, maybe consider splitting into a library?
 // TODO: update README.md
+// TODO: ci integration workflow (how to use the backend to upload a new app from a ci)
 
 #[get("/health")]
 async fn health() -> impl Responder {

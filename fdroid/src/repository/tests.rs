@@ -1,4 +1,6 @@
-use crate::repository::tests::utils::*;
+//! Module for Testing the library
+
+use crate::repository::tests::utils::{get_repo_path, init_default, TestRepo};
 use itertools::Zip;
 use std::fs::File;
 use std::io::Read;
@@ -6,17 +8,12 @@ use std::io::Read;
 /// Test Utils
 mod utils {
   use crate::repository::Repository;
-  use actix_multipart::form::tempfile::TempFile;
-  use std::fs::File;
-  use std::io::{Read, Write};
   use std::{fs, path::PathBuf};
-  use tempfile::NamedTempFile;
   use uuid::Uuid;
 
   /// NewType for Repository struct
   /// Most important: Removes all files after being dropped
   pub struct TestRepo(Repository);
-  type TestApk = (String, PathBuf, File, TempFile);
 
   impl Drop for TestRepo {
     fn drop(&mut self) {
@@ -40,17 +37,19 @@ mod utils {
       // create repo
       fs::create_dir_all(&repo_path).unwrap();
 
-      Self(Repository::new(repo_path))
+      Self(Repository::new(repo_path).unwrap())
     }
   }
 
   /// Returns the main path for test repos
   pub fn get_repo_path() -> PathBuf {
-    PathBuf::from("developement/tests").canonicalize().unwrap()
+    PathBuf::from("../development/tests")
+      .canonicalize()
+      .unwrap()
   }
 
   /// Returns a list of all available test apks
-  pub fn get_test_apks() -> Vec<TestApk> {
+  pub fn get_test_apks() -> Vec<PathBuf> {
     vec![
       "com.dede.android_eggs_28",
       "fr.ralala.hexviewer_142",
@@ -61,32 +60,14 @@ mod utils {
     .iter()
     .map(|name| {
       let file_path = get_repo_path().join(format!("../test-resources/{name}.apk"));
-      let file = File::open(&file_path).unwrap();
-      let temp_file = temp_file_from_file(file, name);
-      let file = File::open(&file_path).unwrap();
-      (name.to_string(), file_path, file, temp_file)
+      file_path
     })
     .collect()
   }
 
   /// Returns a single TestApk for testing
-  pub fn get_test_apk() -> TestApk {
+  pub fn get_test_apk() -> PathBuf {
     get_test_apks().pop().unwrap()
-  }
-
-  /// Creates a temp file from an file
-  pub fn temp_file_from_file(file: File, file_name: &str) -> TempFile {
-    let file_contents: Vec<u8> = file.bytes().map(|byte| byte.unwrap()).collect();
-    // create temp test file
-    let mut temp_test_file = NamedTempFile::new().unwrap();
-    temp_test_file.write_all(&file_contents).unwrap();
-
-    TempFile {
-      file: temp_test_file,
-      content_type: None,
-      file_name: Some(file_name.to_owned()),
-      size: 0,
-    }
   }
 
   /// Creates a new repo with one app uploaded
@@ -97,7 +78,7 @@ mod utils {
     let test_apk = get_test_apk();
 
     // sign app
-    repo.get_repo().sign_app(test_apk.3).unwrap();
+    repo.get_repo().sign_app(&test_apk).unwrap();
     repo
   }
 }
@@ -107,7 +88,7 @@ mod utils {
 fn apps_empty() {
   let repo = TestRepo::default();
 
-  assert!(repo.get_repo().get_apps().unwrap().is_empty());
+  assert!(repo.get_repo().apps().unwrap().is_empty());
 }
 
 /// Test that uploading an app works
@@ -116,7 +97,7 @@ fn upload_app() {
   let repo = init_default();
 
   // check that one app has been created
-  let apps = repo.get_repo().get_apps().unwrap();
+  let apps = repo.get_repo().apps().unwrap();
   assert_eq!(apps.len(), 1);
 }
 
@@ -126,7 +107,7 @@ fn upload_config() {
   let repo = TestRepo::default();
 
   // get default config
-  let mut config = repo.get_repo().get_public_config().unwrap();
+  let mut config = repo.get_repo().config().unwrap();
 
   // modify config
   config.repo_name = Some("new name".to_string());
@@ -136,7 +117,7 @@ fn upload_config() {
   repo.get_repo().set_config(&config).unwrap();
 
   // get new safed config
-  let new_config = repo.get_repo().get_public_config().unwrap();
+  let new_config = repo.get_repo().config().unwrap();
 
   assert_eq!(config, new_config);
 }
@@ -147,7 +128,7 @@ fn sign() {
   let repo = init_default();
 
   // check that one app has been created
-  let apps = repo.get_repo().get_apps().unwrap();
+  let apps = repo.get_repo().apps().unwrap();
   assert_eq!(apps.len(), 1);
 }
 
@@ -156,7 +137,7 @@ fn sign() {
 fn delete_one() {
   let repo = init_default();
 
-  let mut apps = repo.get_repo().get_apps().unwrap();
+  let mut apps = repo.get_repo().apps().unwrap();
 
   // only one app should exist
   assert_eq!(apps.len(), 1);
@@ -172,7 +153,7 @@ fn delete_one() {
   repo.get_repo().delete_app(&package.apk_name).unwrap();
 
   // check that apps is empty
-  let apps = repo.get_repo().get_apps().unwrap();
+  let apps = repo.get_repo().apps().unwrap();
 
   assert!(apps.is_empty());
 }
@@ -183,10 +164,10 @@ fn metadata() {
   let repo = init_default();
 
   // get app
-  let app = repo.get_repo().get_apps().unwrap().pop().unwrap();
+  let app = repo.get_repo().apps().unwrap().pop().unwrap();
 
   // get metadata
-  let mut metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+  let mut metadata = repo.get_repo().metadata(&app.package_name).unwrap();
 
   // change metadata
   metadata.AuthorName = Some("Dominik Schwaiger".to_string());
@@ -200,7 +181,7 @@ fn metadata() {
     .unwrap();
 
   // get new metadata
-  let new_metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+  let new_metadata = repo.get_repo().metadata(&app.package_name).unwrap();
 
   assert_eq!(metadata, new_metadata);
 }
@@ -215,15 +196,13 @@ fn image_upload() {
   let image_path = get_repo_path()
     .join("../test-resources")
     .join(test_image_name);
-  let image = File::open(image_path.clone()).unwrap();
-  let tmp_image = temp_file_from_file(image, test_image_name);
-  let mut image = File::open(image_path).unwrap();
+  let mut image = File::open(&image_path).unwrap();
 
   // upload new image
-  repo.get_repo().save_image(tmp_image).unwrap();
+  repo.get_repo().set_image(&image_path).unwrap();
 
   // get uploaded image
-  let mut uploaded_image = File::open(repo.get_repo().get_image_path().unwrap()).unwrap();
+  let mut uploaded_image = File::open(repo.get_repo().image_path().unwrap()).unwrap();
 
   // get both image contents
   let mut image_content = vec![];

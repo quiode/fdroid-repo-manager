@@ -1,20 +1,22 @@
 //! Route used to edit apps and their metadata
 
+use crate::routes::FileUploadForm;
+use crate::utils::error::*;
+use crate::utils::persist_temp_file;
 use actix_multipart::form::MultipartForm;
 use actix_web::{
   delete, get, post, put,
   web::{self, Json},
-  Responder, Result,
+  Responder,
 };
+use fdroid::metadata::AppMetadata;
+use fdroid::Repository;
 use log::{debug, info};
-
-use crate::repository::app_metadata::AppMetadata;
-use crate::repository::Repository;
-use crate::routes::FileUploadForm;
+use std::fs;
 
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
-  let apps = repo.get_apps()?;
+  let apps = repo.apps()?;
 
   Ok(Json(apps))
 }
@@ -27,7 +29,9 @@ async fn upload_app(
   let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
   info!("Uploading a new app: \"{}\"...", file_name);
 
-  repo.upload_app(form.0.app)?;
+  let file_path = persist_temp_file(form.0.app)?;
+  repo.add_app(&file_path)?;
+  fs::remove_file(file_path)?;
 
   debug!("Finished uploading app: \"{}\"!", file_name);
   Ok("")
@@ -42,7 +46,9 @@ async fn sign_app(
   let file_name = form.0.app.file_name.clone().unwrap_or("NONE".to_owned());
   info!("Uploading and Signing a new app: \"{}\"", file_name);
 
-  repo.sign_app(form.0.app)?;
+  let file_path = persist_temp_file(form.0.app)?;
+  repo.sign_app(&file_path)?;
+  fs::remove_file(file_path)?;
 
   Ok("")
 }
@@ -63,7 +69,7 @@ async fn get_metadata(
   path: web::Path<String>,
   repo: web::Data<Repository>,
 ) -> Result<impl Responder> {
-  Ok(Json(repo.get_metadata(&path)?))
+  Ok(Json(repo.metadata(&path)?))
 }
 
 /// Update the metadata for a package

@@ -5,6 +5,6 @@ pub mod app;
 pub mod config;
 
 #[derive(MultipartForm)]
-pub struct FileUploadForm {
+struct FileUploadForm {
   pub app: TempFile,
 }

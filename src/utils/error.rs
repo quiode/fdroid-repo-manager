@@ -1,65 +1,87 @@
-use actix_web::{http::StatusCode, ResponseError};
-use core::fmt;
-use std::{error, io};
+use std::fmt::{Display, Formatter};
+use std::io;
+
+use actix_web::http::StatusCode;
+use actix_web::ResponseError;
+
+use self::Error::*;
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub enum Error {
+  UserError(String),
+  UnexpectedError(String),
+  Custom(String, StatusCode),
+}
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug)]
-#[allow(dead_code)]
-pub enum Error {
-  File(io::Error),
-  YAMLConvert(serde_yaml::Error),
-  JsonConvert(String),
-  /// Custom Error message
-  Custom(String),
-  /// User Error
-  User(String),
-}
-
-impl fmt::Display for Error {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      Error::File(err) => write!(f, "Error while working with a file: {err:#?}"),
-      Error::YAMLConvert(err) => write!(f, "Error while converting a yml file: {err:#?}"),
-      Error::JsonConvert(err) => write!(f, "Error while converting a json file: {err}"),
-      Error::Custom(err) => write!(f, "{err}"),
-      Error::User(err) => write!(f, "{err}"),
-    }
-  }
-}
-
-impl error::Error for Error {
-  fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-    match self {
-      Error::File(err) => Some(err),
-      Error::YAMLConvert(err) => Some(err),
-      Error::JsonConvert(_) => None,
-      Error::Custom(_) => None,
-      Error::User(_) => None,
+impl From<fdroid::error::Error> for Error {
+  fn from(value: fdroid::error::Error) -> Self {
+    match value {
+      fdroid::error::Error::File(error) => UnexpectedError(format!(
+        "An Unexpected File Error occurred: {}",
+        error.to_string()
+      )),
+      fdroid::error::Error::YAMLConvert(error) => UnexpectedError(format!(
+        "An Unexpected YAML-Convert Error occurred: {}",
+        error.to_string()
+      )),
+      fdroid::error::Error::JsonConvert(error) => UnexpectedError(format!(
+        "An Unexpected JSON-Convert Error occurred: {}",
+        error.to_string()
+      )),
+      fdroid::error::Error::InvalidFile(_) => UnexpectedError(format!(
+        "An Unexpected Invalid File Error occurred: {}",
+        value.to_string()
+      )),
+      fdroid::error::Error::NotAFile(_) => UnexpectedError(format!(
+        "An Unexpected Invalid File Error occurred: {}",
+        value.to_string()
+      )),
+      fdroid::error::Error::NotADirectory(_) => UnexpectedError(format!(
+        "An Unexpected Invalid Directory Error occurred: {}",
+        value.to_string()
+      )),
+      fdroid::error::Error::Init => UnexpectedError(format!(
+        "An error occurred while initializing the repository!"
+      )),
+      fdroid::error::Error::Update => {
+        UnexpectedError(format!("An error occurred while updating the repository!"))
+      }
+      fdroid::error::Error::Run(_) => UnexpectedError(format!(
+        "An error occurred while running a command: {}",
+        value.to_string()
+      )),
     }
   }
 }
 
 impl From<io::Error> for Error {
-  fn from(error: io::Error) -> Self {
-    Self::File(error)
+  fn from(value: io::Error) -> Self {
+    UserError(format!(
+      "An Unexpected IO-Error occurred: {}",
+      value.to_string()
+    ))
   }
 }
 
-impl From<serde_yaml::Error> for Error {
-  fn from(error: serde_yaml::Error) -> Self {
-    Self::YAMLConvert(error)
+impl Display for Error {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    match &self {
+      UserError(message) => write!(f, "UserError: \"{}\"", message),
+      UnexpectedError(message) => write!(f, "UnexpectedError: \"{}\"", message),
+      Custom(message, _error_code) => write!(f, "{}", message),
+    }
   }
 }
 
 impl ResponseError for Error {
   fn status_code(&self) -> StatusCode {
     match self {
-      Error::File(err) => err.status_code(),
-      Error::YAMLConvert(_) => StatusCode::INTERNAL_SERVER_ERROR,
-      Error::JsonConvert(_) => StatusCode::INTERNAL_SERVER_ERROR,
-      Error::Custom(_) => StatusCode::INTERNAL_SERVER_ERROR,
-      Error::User(_) => StatusCode::BAD_REQUEST,
+      UserError(_) => StatusCode::BAD_REQUEST,
+      UnexpectedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+      Custom(_, status_code) => status_code.clone(),
     }
   }
 }
