@@ -16,7 +16,7 @@ use std::fs;
 
 #[get("")]
 async fn get_apps(repo: web::Data<Repository>) -> Result<impl Responder> {
-  let apps = repo.get_apps()?;
+  let apps = repo.apps()?;
 
   Ok(Json(apps))
 }
@@ -30,7 +30,7 @@ async fn upload_app(
   info!("Uploading a new app: \"{}\"...", file_name);
 
   let file_path = persist_temp_file(form.0.app)?;
-  repo.upload_app(&file_path)?;
+  repo.add_app(&file_path)?;
   fs::remove_file(file_path)?;
 
   debug!("Finished uploading app: \"{}\"!", file_name);

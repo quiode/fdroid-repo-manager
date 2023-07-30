@@ -88,7 +88,7 @@ mod utils {
 fn apps_empty() {
   let repo = TestRepo::default();
 
-  assert!(repo.get_repo().get_apps().unwrap().is_empty());
+  assert!(repo.get_repo().apps().unwrap().is_empty());
 }
 
 /// Test that uploading an app works
@@ -97,7 +97,7 @@ fn upload_app() {
   let repo = init_default();
 
   // check that one app has been created
-  let apps = repo.get_repo().get_apps().unwrap();
+  let apps = repo.get_repo().apps().unwrap();
   assert_eq!(apps.len(), 1);
 }
 
@@ -128,7 +128,7 @@ fn sign() {
   let repo = init_default();
 
   // check that one app has been created
-  let apps = repo.get_repo().get_apps().unwrap();
+  let apps = repo.get_repo().apps().unwrap();
   assert_eq!(apps.len(), 1);
 }
 
@@ -137,7 +137,7 @@ fn sign() {
 fn delete_one() {
   let repo = init_default();
 
-  let mut apps = repo.get_repo().get_apps().unwrap();
+  let mut apps = repo.get_repo().apps().unwrap();
 
   // only one app should exist
   assert_eq!(apps.len(), 1);
@@ -153,7 +153,7 @@ fn delete_one() {
   repo.get_repo().delete_app(&package.apk_name).unwrap();
 
   // check that apps is empty
-  let apps = repo.get_repo().get_apps().unwrap();
+  let apps = repo.get_repo().apps().unwrap();
 
   assert!(apps.is_empty());
 }
@@ -164,7 +164,7 @@ fn metadata() {
   let repo = init_default();
 
   // get app
-  let app = repo.get_repo().get_apps().unwrap().pop().unwrap();
+  let app = repo.get_repo().apps().unwrap().pop().unwrap();
 
   // get metadata
   let mut metadata = repo.get_repo().metadata(&app.package_name).unwrap();
@@ -202,7 +202,7 @@ fn image_upload() {
   repo.get_repo().set_image(&image_path).unwrap();
 
   // get uploaded image
-  let mut uploaded_image = File::open(repo.get_repo().get_image_path().unwrap()).unwrap();
+  let mut uploaded_image = File::open(repo.get_repo().image_path().unwrap()).unwrap();
 
   // get both image contents
   let mut image_content = vec![];

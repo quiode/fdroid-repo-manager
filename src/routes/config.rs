@@ -45,7 +45,7 @@ async fn get_keystore(request: HttpRequest, repo: web::Data<Repository>) -> Resu
 async fn get_keystore_password(repo: web::Data<Repository>) -> Result<impl Responder> {
   debug!("Downloading keystore password!");
 
-  let password = repo.get_keystore_password()?;
+  let password = repo.keystore_password()?;
   let mut map = HashMap::new();
   map.insert("password", password);
   Ok(Json(map))
@@ -69,7 +69,7 @@ async fn upload_picture(
 async fn get_picture(request: HttpRequest, repo: web::Data<Repository>) -> Result<impl Responder> {
   debug!("Downloading Image!");
 
-  let image = actix_files::NamedFile::open_async(repo.get_image_path()?).await?;
+  let image = actix_files::NamedFile::open_async(repo.image_path()?).await?;
 
   Ok(image.into_response(&request))
 }

@@ -64,7 +64,7 @@ impl Repository {
   /// # Error
   /// Returns an error if the command fails
   ///
-  /// Runs "`fdroid init`"
+  /// Runs `fdroid init`
   pub fn initialize(&self) -> Result<()> {
     info!("Initializing a new fdroid repository!");
 
@@ -78,7 +78,7 @@ impl Repository {
   /// Gets automatically called after every apk upload, metadata change, image upload, etc.
   /// and therefore **should never have to be called manually**.
   ///
-  /// Runs "`fdroid update -c; fdroid update`"
+  /// Runs `fdroid update -c; fdroid update`
   ///
   /// See [documentation](https://f-droid.org/en/docs/Setup_an_F-Droid_App_Repo/)
   pub fn update(&self) -> Result<()> {
@@ -88,7 +88,7 @@ impl Repository {
     self.run("update", &vec![]).map_err(|_| Error::Update)
   }
 
-  /// Runs "fdroid publish"
+  /// Runs `fdroid publish`
   pub fn publish(&self) -> Result<()> {
     debug!("Running fdroid publish");
 
@@ -128,7 +128,7 @@ impl Repository {
   /// It maybe has to be called if fields are missing inside the metadata files as this function also
   /// creates missing fields.
   ///
-  /// Runs "`fdroid rewritemeta`"
+  /// Runs `fdroid rewritemeta`
   pub fn cleanup(&self) -> Result<()> {
     debug!("Cleaning up metadata files!");
     self.run("rewritemeta", &vec![])

@@ -123,7 +123,7 @@ impl Repository {
   /// Returns the keystore password
   ///
   /// See [signing](https://f-droid.org/en/docs/Signing_Process/)
-  pub fn get_keystore_password(&self) -> Result<String> {
+  pub fn keystore_password(&self) -> Result<String> {
     let config_file = self.get_config()?;
 
     Ok(config_file.keystorepass)
@@ -133,7 +133,7 @@ impl Repository {
   pub fn set_image(&self, new_image_path: &PathBuf) -> Result<()> {
     debug!("Saving to repository image!");
 
-    let image_path = self.get_image_path()?;
+    let image_path = self.image_path()?;
 
     // check if it is the same image type
     let new_image_type =
@@ -166,7 +166,7 @@ impl Repository {
   }
 
   /// Gets the path to the repository image
-  pub fn get_image_path(&self) -> Result<PathBuf> {
+  pub fn image_path(&self) -> Result<PathBuf> {
     let image_name = self
       .get_config()?
       .repo_icon

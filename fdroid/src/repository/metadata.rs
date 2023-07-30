@@ -613,7 +613,7 @@ impl Repository {
     fs::write(meta_file_path, file_content).map_err(Error::from)
   }
 
-  /// Creates an empty metadata file (if none exist) and runs "`fdroid rewritemeta`"
+  /// Creates an empty metadata file (if none exist) and runs `fdroid rewritemeta`
   pub fn create_metadata(&self, package_name: &str) -> Result<()> {
     let file_path = self.package_metadata_path(package_name);
 

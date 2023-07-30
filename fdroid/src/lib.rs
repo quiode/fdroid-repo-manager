@@ -26,7 +26,7 @@
 //! # use fdroid::Repository;
 //! # let repository_path = PathBuf::from("/fdroid");
 //! # let repository = Repository::new(repository_path).unwrap();
-//! let apps = repository.get_apps().unwrap();
+//! let apps = repository.apps().unwrap();
 //! ```
 //!
 //! ### Upload a new app
@@ -36,7 +36,7 @@
 //! # let repository_path = PathBuf::from("/fdroid");
 //! # let repository = Repository::new(repository_path).unwrap();
 //! # let app_path = PathBuf::from("/apps/app-1");
-//! repository.upload_app(&app_path).unwrap();
+//! repository.add_app(&app_path).unwrap();
 //! ```
 //! ## External Dependencies
 //! - [fdroidserver](https://gitlab.com/fdroid/fdroidserver)  
