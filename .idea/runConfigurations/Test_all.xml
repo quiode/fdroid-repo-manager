@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Test all" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="command" value="test --all" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <option name="emulateTerminal" value="false" />
+    <option name="channel" value="DEFAULT" />
+    <option name="requiredFeatures" value="true" />
+    <option name="allFeatures" value="true" />
+    <option name="withSudo" value="false" />
+    <option name="buildTarget" value="REMOTE" />
+    <option name="backtrace" value="SHORT" />
+    <envs>
+      <env name="RM_IP" value="127.0.0.1" />
+      <env name="RM_PORT" value="8080" />
+      <env name="RM_REPO_PATH" value="$PROJECT_DIR$/development/fdroid" />
+      <env name="RUST_LOG" value="DEBUG" />
+      <env name="ANDROID_HOME" value="/opt/android-sdk" />
+    </envs>
+    <option name="isRedirectInput" value="false" />
+    <option name="redirectInputPath" value="" />
+    <method v="2">
+      <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+    </method>
+  </configuration>
+</component>
