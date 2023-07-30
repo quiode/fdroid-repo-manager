@@ -15,5 +15,5 @@ jobs:
         id: version_get
         with:
           file: Cargo.toml
-          tagFormat: ${version}
+          tagFormat: v${version}
           failBuild: true
