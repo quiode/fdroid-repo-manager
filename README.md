@@ -4,6 +4,8 @@
 
 ### Docker
 
+TODO: when frontend is done
+
 ## Environment Variables
 
 - RM_IP  
