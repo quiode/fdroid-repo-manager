@@ -411,10 +411,10 @@ pub struct Builds {
 
 /// The [Category](https://f-droid.org/en/docs/Build_Metadata_Reference/#Categories) of the package.
 /// Preferably a predefined category like [Category::Games] or [Category::Money], but can also
-/// be a custom Category (see [Categories::Custom(String)]).
+/// be a custom Category (see [Category::Custom]).
 ///
 /// During Deserialization, if a categories does not match any category defined in the enum,
-/// it automatically gets assigned to [Categories::Custom(String)]
+/// it automatically gets assigned to [Category::Custom]
 #[derive(Clone, Serialize, Deserialize, Debug, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum Category {
