@@ -1,0 +1,22 @@
+name: Create Tag
+on:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: git fetch --all --tags
+      - name: Check Release Version
+        uses: thebongy/version-check@v1
+        with:
+          file: Cargo.toml
+          tagFormat: v${version}
+          id: version_get
+      - uses: rickstaa/action-create-tag@v1
+        id: "tag_create"
+        with:
+          tag: "${{steps.version_get.outputs.releaseVersion}}"
