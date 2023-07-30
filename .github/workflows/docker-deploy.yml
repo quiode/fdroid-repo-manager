@@ -24,12 +24,11 @@ jobs:
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
         with:
           prefix: v
-      - name: Format Tag String
-        run: |
-          VERSION=${{steps.previoustag.outputs.tag}}
-          VERSION=${VERSION#v}
-          echo Version: $VERSION
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: "❓ Find the release semantic version"
+        id: semver
+        uses: Steffo99/actions-semver@v0.2.0
+        with:
+          string: ${{ steps.previoustag.outputs.tag }}
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -38,4 +37,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/fdroid-repo-manager:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/fdroid-repo-manager:$VERSION
+            ${{ secrets.DOCKERHUB_USERNAME }}/fdroid-repo-manager:${{ steps.semver.outputs.core }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/fdroid-repo-manager:${{ steps.semver.outputs.pair }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/fdroid-repo-manager:${{ steps.semver.outputs.major }}
