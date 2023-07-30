@@ -3,4 +3,9 @@ Dockerfile
 .git/
 .gitignore
 .vscode/
+.idea/
+.github/
+LICENSE
+README.md
+rustfmt.toml
 development/
