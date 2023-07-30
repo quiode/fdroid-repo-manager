@@ -20,3 +20,8 @@ jobs:
         id: "tag_create"
         with:
           tag: "${{steps.version_get.outputs.releaseVersion}}"
+      - name: add tag
+        uses: laputansoft/github-tag-action@v4.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.version_get.outputs.releaseVersion }}
