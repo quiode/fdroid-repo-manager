@@ -3,4 +3,7 @@
 
 mod aapt;
 pub mod error;
-pub mod repository;
+mod repository;
+
+// Re-Export
+pub use repository::*;

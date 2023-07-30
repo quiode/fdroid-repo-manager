@@ -1,10 +1,10 @@
-//! Module for working with aapt
+//! Module for working with [aapt](https://stackoverflow.com/questions/28234671/what-is-aapt-android-asset-packaging-tool-and-how-does-it-work)
 
 use std::{path::PathBuf, process::Command};
 
 use regex::Regex;
 
-use crate::error::{Error, Result};
+use crate::error::{Error, InvalidFile, Result};
 
 /// Returns metadata of an apk as a string
 ///
@@ -18,45 +18,38 @@ pub fn get_apk_info(apk_path: &PathBuf) -> Result<String> {
       .arg("badging")
       .arg(apk_path)
       .output()
-      .map_err(|_| Error::Custom("Failed to get metadata from apk!".to_owned()))?;
+      .map_err(|_| Error::InvalidFile(InvalidFile::without_reason(apk_path.clone())))?;
 
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
   } else {
-    Err(Error::Custom("APK Path is not a valid file!".to_owned()))
+    Err(Error::NotAFile(apk_path.clone()))
   }
 }
 
 /// gets the version code from an apk metadata string
-pub fn get_version_code(metadata: &str) -> Result<u32> {
+///
+/// returns [None] if the version code couldn't be found
+pub fn get_version_code(metadata: &str) -> Option<u32> {
   let regex = Regex::new(r"versionCode='(\d+)'").unwrap();
 
   // apply regext to string
-  let Some(captures) = regex.captures(metadata) else {
-    return Err(Error::Custom("versionCode not found!".to_owned()));
-  };
+  let captures = regex.captures(metadata)?;
 
-  let string_version_code = captures
-    .get(1)
-    .ok_or(Error::Custom("versionCode not found!".to_owned()))?;
+  let string_version_code = captures.get(1)?;
 
-  string_version_code
-    .as_str()
-    .parse()
-    .map_err(|_| Error::Custom("versionCode is not a valid number!".to_owned()))
+  string_version_code.as_str().parse().ok()
 }
 
 /// gets the name from an apk metadata string
-pub fn get_name(metadata: &str) -> Result<String> {
+///
+/// returns [None] if the name couldn't be found
+pub fn get_name(metadata: &str) -> Option<String> {
   let regex = Regex::new(r"name='((?:[[:alpha:]]|\.)+)'").unwrap();
 
   // apply regext to string
-  let Some(captures) = regex.captures(metadata) else {
-    return Err(Error::Custom("name not found!".to_owned()));
-  };
+  let captures = regex.captures(metadata)?;
 
-  let name = captures
-    .get(1)
-    .ok_or(Error::Custom("name not found!".to_owned()))?;
+  let name = captures.get(1)?;
 
-  Ok(name.as_str().to_string())
+  Some(name.as_str().to_string())
 }

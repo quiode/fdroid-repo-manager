@@ -1,3 +1,11 @@
+//! # Manage [App]s and [Package]s
+//!
+//! Each [Repository] has multiple Apps.
+//!
+//! Each App has multiple Packages.
+//!
+//! A Package is a single [apk](https://en.wikipedia.org/wiki/Apk_(file_format))
+
 use std::path::PathBuf;
 use std::{
   fs::{self, File},
@@ -8,7 +16,7 @@ use log::{info, warn};
 use serde::Serialize;
 
 use crate::aapt::*;
-use crate::error::*;
+use crate::error::{Error, InvalidFile, Result};
 
 use super::Repository;
 
@@ -281,8 +289,13 @@ impl Repository {
     let apk_metadata = get_apk_info(file_path)?;
 
     // get version and name
-    let apk_version = get_version_code(&apk_metadata)?;
-    let apk_name = get_name(&apk_metadata)?;
+    let apk_version = get_version_code(&apk_metadata).ok_or(Error::InvalidFile(
+      InvalidFile::with_reason(file_path.clone(), "Version Code not found!"),
+    ))?;
+    let apk_name = get_name(&apk_metadata).ok_or(Error::InvalidFile(InvalidFile::with_reason(
+      file_path.clone(),
+      "Name not found!",
+    )))?;
 
     // Upload apk to unsigned folder
     let new_file_path = self
@@ -292,7 +305,7 @@ impl Repository {
     fs::copy(file_path, &new_file_path)?;
 
     // check if metadata exists
-    let metadata = self.get_metadata(&apk_name);
+    let metadata = self.metadata(&apk_name);
     if metadata.is_err() {
       warn!("No metadata for this package exists, creating empty metadata file!");
       self.create_metadata(&apk_name)?;

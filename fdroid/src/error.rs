@@ -1,7 +1,10 @@
+//! Module contain the package [Error] Enum
+
 use core::fmt;
 use std::path::PathBuf;
 use std::{error, io};
 
+/// [std::result::Result] type for [Error] for easier error handling
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error enum for this crate
@@ -34,6 +37,33 @@ pub enum Error {
   ///
   /// Contains the command
   Run(String),
+  InvalidFile(InvalidFile),
+}
+
+/// Struct for an [Error::InvalidFile] error.
+///
+/// Has to contain the file but can optionally also contain the reason.
+#[derive(Debug)]
+pub struct InvalidFile {
+  /// Optional reason as to why the file is invalid
+  pub reason: Option<String>,
+  /// Path to the invalid file
+  pub file: PathBuf,
+}
+
+impl InvalidFile {
+  /// Create a new Instance with empty reason
+  pub fn without_reason(file: PathBuf) -> Self {
+    Self { reason: None, file }
+  }
+
+  /// Create a new Instance with a reason
+  pub fn with_reason(file: PathBuf, reason: &str) -> Self {
+    Self {
+      reason: Some(reason.to_string()),
+      file,
+    }
+  }
 }
 
 impl fmt::Display for Error {
@@ -47,6 +77,16 @@ impl fmt::Display for Error {
       Error::Init => write!(f, "Could not initialize the repository!"),
       Error::Update => write!(f, "Could not update the repository!"),
       Error::Run(command) => write!(f, "Command failed. Command \"{command}\"!"),
+      Error::InvalidFile(invalid_file) => write!(
+        f,
+        "File with path {:?} is invalid.{}",
+        invalid_file.file,
+        invalid_file
+          .reason
+          .clone()
+          .map(|reason| format!(" Reason: \"{reason}\"."))
+          .unwrap_or(String::new())
+      ),
     }
   }
 }

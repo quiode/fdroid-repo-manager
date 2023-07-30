@@ -7,13 +7,12 @@ use log::{debug, info, warn};
 mod tests;
 
 mod app;
-mod app_metadata;
 mod config;
+pub mod metadata;
 mod paths;
 
 // Re-Export
 pub use app::*;
-pub use app_metadata::*;
 pub use config::*;
 pub use paths::*;
 

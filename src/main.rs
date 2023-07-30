@@ -22,6 +22,7 @@ mod routes;
 mod utils;
 
 // TODO: update README.md
+// TODO: ci integration workflow
 
 #[get("/health")]
 async fn health() -> impl Responder {

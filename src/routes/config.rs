@@ -6,7 +6,7 @@ use crate::utils::persist_temp_file;
 use actix_multipart::form::MultipartForm;
 use actix_web::web::Json;
 use actix_web::{get, post, web, HttpRequest, Responder};
-use fdroid::repository::{PublicConfig, Repository};
+use fdroid::repository::{Config, Repository};
 use log::debug;
 use std::collections::HashMap;
 use std::fs;
@@ -15,7 +15,7 @@ use std::fs;
 // TODO: build apps using fdroid import, build
 #[get("")]
 async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
-  let config = repo.get_public_config()?;
+  let config = repo.config()?;
 
   Ok(Json(config))
 }
@@ -23,7 +23,7 @@ async fn get_config(repo: web::Data<Repository>) -> Result<impl Responder> {
 #[post("")]
 async fn post_config(
   repo: web::Data<Repository>,
-  public_config: Json<PublicConfig>,
+  public_config: Json<Config>,
 ) -> Result<impl Responder> {
   repo.set_config(&public_config.0)?;
 
@@ -58,7 +58,7 @@ async fn upload_picture(
   form: MultipartForm<FileUploadForm>,
 ) -> Result<impl Responder> {
   let file_path = persist_temp_file(form.0.app)?;
-  repo.save_image(&file_path)?;
+  repo.set_image(&file_path)?;
   fs::remove_file(file_path)?;
 
   Ok("")

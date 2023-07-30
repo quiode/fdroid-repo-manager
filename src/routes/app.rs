@@ -68,7 +68,7 @@ async fn get_metadata(
   path: web::Path<String>,
   repo: web::Data<Repository>,
 ) -> Result<impl Responder> {
-  Ok(Json(repo.get_metadata(&path)?))
+  Ok(Json(repo.metadata(&path)?))
 }
 
 /// Update the metadata for a package

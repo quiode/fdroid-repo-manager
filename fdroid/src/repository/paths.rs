@@ -1,6 +1,6 @@
 //! Module only for getting specific paths
 
-use crate::error::Error;
+use crate::error::{Error, Result};
 use crate::repository::Repository;
 use std::fs;
 use std::path::PathBuf;

@@ -1,3 +1,5 @@
+//! Module for Testing the library
+
 use crate::repository::tests::utils::{get_repo_path, init_default, TestRepo};
 use itertools::Zip;
 use std::fs::File;
@@ -105,7 +107,7 @@ fn upload_config() {
   let repo = TestRepo::default();
 
   // get default config
-  let mut config = repo.get_repo().get_public_config().unwrap();
+  let mut config = repo.get_repo().config().unwrap();
 
   // modify config
   config.repo_name = Some("new name".to_string());
@@ -115,7 +117,7 @@ fn upload_config() {
   repo.get_repo().set_config(&config).unwrap();
 
   // get new safed config
-  let new_config = repo.get_repo().get_public_config().unwrap();
+  let new_config = repo.get_repo().config().unwrap();
 
   assert_eq!(config, new_config);
 }
@@ -165,7 +167,7 @@ fn metadata() {
   let app = repo.get_repo().get_apps().unwrap().pop().unwrap();
 
   // get metadata
-  let mut metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+  let mut metadata = repo.get_repo().metadata(&app.package_name).unwrap();
 
   // change metadata
   metadata.AuthorName = Some("Dominik Schwaiger".to_string());
@@ -179,7 +181,7 @@ fn metadata() {
     .unwrap();
 
   // get new metadata
-  let new_metadata = repo.get_repo().get_metadata(&app.package_name).unwrap();
+  let new_metadata = repo.get_repo().metadata(&app.package_name).unwrap();
 
   assert_eq!(metadata, new_metadata);
 }
@@ -197,7 +199,7 @@ fn image_upload() {
   let mut image = File::open(&image_path).unwrap();
 
   // upload new image
-  repo.get_repo().save_image(&image_path).unwrap();
+  repo.get_repo().set_image(&image_path).unwrap();
 
   // get uploaded image
   let mut uploaded_image = File::open(repo.get_repo().get_image_path().unwrap()).unwrap();
