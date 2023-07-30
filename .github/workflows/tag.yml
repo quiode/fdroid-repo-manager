@@ -12,10 +12,10 @@ jobs:
       - run: git fetch --all --tags
       - name: Check Release Version
         uses: thebongy/version-check@v1
+        id: version_get
         with:
           file: Cargo.toml
           tagFormat: v${version}
-          id: version_get
       - uses: rickstaa/action-create-tag@v1
         id: "tag_create"
         with:
