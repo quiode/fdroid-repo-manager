@@ -1,6 +1,6 @@
 {
   "name": "fdroid-repo-manager",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,10 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
+  "engines": {
+    "node": "^18.17.0"
+  },
+  "packageManager": "pnpm@8.6.10",
   "dependencies": {
     "pinia": "^2.1.4",
     "vue": "^3.3.4",
