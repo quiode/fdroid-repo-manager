@@ -106,3 +106,12 @@ async fn main() -> std::io::Result<()> {
   .run()
   .await
 }
+
+#[cfg(test)]
+mod test {
+
+  #[test]
+  fn builds() {
+    // tests that this builds
+  }
+}
