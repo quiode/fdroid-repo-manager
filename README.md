@@ -21,6 +21,15 @@ TODO: when frontend is done
 - ANDROID_HOME  
   path to the android sdk
 
+## Routes
+
+- `/`  
+frontend
+- `/api`  
+backend
+- `/fdroid`  
+fdroid repository
+
 ## Development
 
 ### Dependencies
