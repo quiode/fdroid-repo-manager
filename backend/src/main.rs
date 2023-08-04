@@ -15,6 +15,7 @@ use crate::routes::app::{
 };
 use crate::utils::app_config::{AppConfig, WrappedValue};
 use actix_files as fs;
+use actix_files::NamedFile;
 use fdroid::Repository;
 
 mod guards;
@@ -27,6 +28,15 @@ mod utils;
 #[get("/health")]
 async fn health() -> impl Responder {
   HttpResponse::Ok().body("Ok!")
+}
+
+/// Returns the angular index.html file
+async fn angular_index() -> actix_web::Result<NamedFile> {
+  let app_config = AppConfig::from_env();
+
+  Ok(NamedFile::open(
+    app_config.frontend_path.value().join("index.html"),
+  )?)
 }
 
 #[actix_web::main]
@@ -104,7 +114,8 @@ async fn main() -> std::io::Result<()> {
               .unwrap_or(true)
           }),
       )
-      .default_service(fs::Files::new("/", app_config.frontend_path.value()))
+      .service(actix_files::Files::new("/", "./static_content").index_file("index.html"))
+      .default_service(web::get().to(angular_index))
   })
   .bind((*app_config_clone.ip.value(), *app_config_clone.port.value()))?
   .run()

@@ -20,6 +20,8 @@ TODO: when frontend is done
   Max Payload size (important for apk uploads)
 - ANDROID_HOME  
   path to the android sdk
+- RM_FRONTEND_PATH  
+  path to the static frontend files (dist)
 
 ## Routes
 

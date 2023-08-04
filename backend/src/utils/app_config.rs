@@ -234,6 +234,16 @@ impl AppConfig {
           }
         })
         .unwrap_or_default(),
+      frontend_path: env::var("RM_FRONTEND_PATH")
+        .map(|string| {
+          let parsed_string = string.parse();
+
+          match parsed_string {
+            Ok(path) => FrontendPath(path),
+            Err(_) => FrontendPath::default(),
+          }
+        })
+        .unwrap_or_default(),
       admin_password: env::var("RM_ADMIN_PASSWORD")
         .map(|string| {
           let parsed_string = string.parse();

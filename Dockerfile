@@ -6,12 +6,12 @@ RUN cargo install --path .
 FROM node:18-alpine as frontend-builder
 # Install dependencies
 RUN npm i -g pnpm
-COPY ./frontend/package.json /usr/src/fdroid-repo-manager/frontend/
-COPY ./frontend/pnpm-lock.yaml /usr/src/fdroid-repo-manager/frontend/
 WORKDIR /usr/src/fdroid-repo-manager/frontend/
+COPY ./frontend/package.json ./
+COPY ./frontend/pnpm-lock.yaml ./
 RUN pnpm install
 # Build
-COPY ./frontend /usr/src/fdroid-repo-manager/frontend/
+COPY ./frontend/ ./
 RUN pnpm build
 
 FROM debian:bullseye-slim
