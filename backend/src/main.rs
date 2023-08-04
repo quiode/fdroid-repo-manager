@@ -104,7 +104,7 @@ async fn main() -> std::io::Result<()> {
       .service(
         fs::Files::new("/fdroid", app_config.repo_path.value())
           .show_files_listing()
-          // remove acces to hidden files
+          // remove access to hidden files
           .path_filter(|path, _| {
             // files that shouldn't be accessible
             let hidden_files = vec!["config.yml", "keystore.p12"];
@@ -114,7 +114,9 @@ async fn main() -> std::io::Result<()> {
               .unwrap_or(true)
           }),
       )
-      .service(actix_files::Files::new("/", "./static_content").index_file("index.html"))
+      .service(
+        actix_files::Files::new("/", app_config.frontend_path.value()).index_file("index.html"),
+      )
       .default_service(web::get().to(angular_index))
   })
   .bind((*app_config_clone.ip.value(), *app_config_clone.port.value()))?
