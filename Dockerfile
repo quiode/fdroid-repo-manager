@@ -1,6 +1,6 @@
 FROM rust:1-bullseye as builder
-WORKDIR /usr/src/fdroid-repo-manager
-COPY . .
+COPY ./backend /usr/src/fdroid-repo-manager/backend
+WORKDIR /usr/src/fdroid-repo-manager/backend
 RUN cargo install --path .
 
 FROM debian:bullseye-slim
