@@ -92,6 +92,33 @@ impl WrappedValue<PathBuf> for RepoPath {
 }
 
 #[derive(Clone, Debug)]
+pub struct FrontendPath(PathBuf);
+
+impl Default for FrontendPath {
+  fn default() -> Self {
+    Self(PathBuf::from("/website"))
+  }
+}
+
+impl From<PathBuf> for FrontendPath {
+  fn from(value: PathBuf) -> Self {
+    Self(value)
+  }
+}
+
+impl ToString for FrontendPath {
+  fn to_string(&self) -> String {
+    self.0.to_string_lossy().to_string()
+  }
+}
+
+impl WrappedValue<PathBuf> for FrontendPath {
+  fn value(&self) -> &PathBuf {
+    &self.0
+  }
+}
+
+#[derive(Clone, Debug)]
 pub struct Password(String);
 
 impl Default for Password {
@@ -168,6 +195,8 @@ pub struct AppConfig {
   pub admin_password: Password,
   // Payload Size
   pub max_payload_size: MaxPayloadSize,
+  // RM_FRONTEND_PATH
+  pub frontend_path: FrontendPath,
 }
 
 impl AppConfig {

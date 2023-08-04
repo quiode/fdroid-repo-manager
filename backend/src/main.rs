@@ -61,8 +61,35 @@ async fn main() -> std::io::Result<()> {
       .wrap(middleware::Compress::default())
       // add logger as middleware
       .wrap(logger)
-      // health service for HEALTHCHECK in docker
-      .service(health)
+      .service(
+        web::scope("/api")
+          // health service for HEALTHCHECK in docker
+          .service(health)
+          // config services for manipulating fdroid config file
+          .service(
+            web::scope("/config")
+              .service(get_config)
+              .service(post_config)
+              .service(get_keystore)
+              .service(get_keystore_password)
+              .service(upload_picture)
+              .service(get_picture)
+              .guard(AuthGuard),
+          )
+          // app services for manipulating apps
+          .service(
+            web::scope("/apps")
+              .service(get_apps)
+              .service(upload_app)
+              .service(delete_app)
+              .service(get_metadata)
+              .service(delete_all)
+              .service(cleanup_files)
+              .service(update_metadata)
+              .service(sign_app)
+              .guard(AuthGuard),
+          ),
+      )
       // fdroid repo for fdroid
       .service(
         fs::Files::new("/fdroid", app_config.repo_path.value())
@@ -77,30 +104,7 @@ async fn main() -> std::io::Result<()> {
               .unwrap_or(true)
           }),
       )
-      // config services for manipulating fdroid config file
-      .service(
-        web::scope("/config")
-          .service(get_config)
-          .service(post_config)
-          .service(get_keystore)
-          .service(get_keystore_password)
-          .service(upload_picture)
-          .service(get_picture)
-          .guard(AuthGuard),
-      )
-      // app services for manipulating apps
-      .service(
-        web::scope("/apps")
-          .service(get_apps)
-          .service(upload_app)
-          .service(delete_app)
-          .service(get_metadata)
-          .service(delete_all)
-          .service(cleanup_files)
-          .service(update_metadata)
-          .service(sign_app)
-          .guard(AuthGuard),
-      )
+      .default_service(fs::Files::new("/", app_config.frontend_path.value()))
   })
   .bind((*app_config_clone.ip.value(), *app_config_clone.port.value()))?
   .run()
