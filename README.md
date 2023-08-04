@@ -9,17 +9,17 @@ TODO: when frontend is done
 ## Environment Variables
 
 - RM_IP  
-IP Adress of the server
+  IP Adress of the server
 - RM_PORT  
-Port of the server
+  Port of the server
 - RM_REPO_PATH  
-Path to the repository
+  Path to the repository
 - RUST_LOG  
-Log level of the logger
+  Log level of the logger
 - RM_MAX_PAYLOAD_SIZE  
-Max Payload size (important for apk uploads)
+  Max Payload size (important for apk uploads)
 - ANDROID_HOME  
-path to the android sdk
+  path to the android sdk
 
 ## Development
 
@@ -28,13 +28,17 @@ path to the android sdk
 - fdroidserver
 - aapt
 
-### Build
+### Backend
+
+Backend is inside `./backend`
+
+#### Build
 
 ```bash
 cargo build
 ```
 
-### Run
+#### Run
 
 ```bash
 RM_IP=127.0.0.1 RM_PORT=8080 RM_REPO_PATH=/home/quio/GitHub/fdroid-repo-manager/development/fdroid RUST_LOG=DEBUG ANDROID_HOME=/opt/android-sdk cargo run

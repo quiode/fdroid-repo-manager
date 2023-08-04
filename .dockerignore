@@ -1,11 +1,13 @@
-target/
+# Backend
+backend/target/
+backend/rustfmt.toml
+
+# Normal
 Dockerfile
 .git/
-.gitignore
-.vscode/
+**/.gitignore
 .idea/
 .github/
 LICENSE
 README.md
-rustfmt.toml
 development/
