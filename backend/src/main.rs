@@ -114,10 +114,8 @@ async fn main() -> std::io::Result<()> {
               .unwrap_or(true)
           }),
       )
-      .service(
-        actix_files::Files::new("/", app_config.frontend_path.value()).index_file("index.html"),
-      )
-      // TODO: fix routes -> /fdroid/repo/...
+      // Frontend
+      // redirect all requests to the frontend if not used by backend
       .default_service(web::get().to(angular_index))
   })
   .bind((*app_config_clone.ip.value(), *app_config_clone.port.value()))?
