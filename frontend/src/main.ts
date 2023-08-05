@@ -4,7 +4,6 @@ import './assets/styles.scss';
 import { createApp } from 'vue';
 
 // Vuetify
-import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import '@mdi/font/css/materialdesignicons.css';
 
