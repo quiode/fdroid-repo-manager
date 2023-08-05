@@ -115,6 +115,9 @@ async fn main() -> std::io::Result<()> {
           }),
       )
       // Frontend
+      .service(
+        actix_files::Files::new("/", app_config.frontend_path.value()).index_file("index.html"),
+      )
       // redirect all requests to the frontend if not used by backend
       .default_service(web::get().to(angular_index))
   })
