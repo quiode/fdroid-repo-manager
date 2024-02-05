@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import AppOverview from '@/components/AppOverview.vue';
+import HeaderComponent from '@/components/HeaderComponent.vue';
+
 </script>
 
 <template>
   <main>
-    <h1>Home</h1>
+    <HeaderComponent></HeaderComponent>
+    <AppOverview></AppOverview>
   </main>
 </template>

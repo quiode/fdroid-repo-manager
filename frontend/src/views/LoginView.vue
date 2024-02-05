@@ -49,7 +49,7 @@ async function login() {
   </main>
 </template>
 
-<style>
+<style scoped>
 #login-container {
   height: 100vh;
 }
