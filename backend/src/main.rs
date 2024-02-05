@@ -52,7 +52,7 @@ async fn main() -> std::io::Result<()> {
   info!("Server started!");
   debug!("App Config: {:#?}", app_config);
 
-  let fdroid_repository = web::Data::new(Repository::new(app_config.repo_path.value().clone()));
+  let fdroid_repository = web::Data::new(Repository::new(app_config.repo_path.value().clone()).unwrap());
   HttpServer::new(move || {
     let logger = Logger::default();
 
