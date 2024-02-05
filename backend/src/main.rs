@@ -107,7 +107,7 @@ async fn main() -> std::io::Result<()> {
           // remove access to hidden files
           .path_filter(|path, _| {
             // files that shouldn't be accessible
-            let hidden_files = vec!["config.yml", "keystore.p12"];
+            let hidden_files = ["config.yml", "keystore.p12"];
             path
               .file_name()
               .map(|file_name| !hidden_files.contains(&file_name.to_str().unwrap()))
