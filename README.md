@@ -8,19 +8,19 @@ TODO: when frontend is done
 
 ## Environment Variables
 
-- RM_IP  
+- RM_IP
   IP Adress of the server
-- RM_PORT  
+- RM_PORT
   Port of the server
-- RM_REPO_PATH  
+- RM_REPO_PATH
   Path to the repository
-- RUST_LOG  
+- RUST_LOG
   Log level of the logger
-- RM_MAX_PAYLOAD_SIZE  
+- RM_MAX_PAYLOAD_SIZE
   Max Payload size (important for apk uploads)
-- ANDROID_HOME  
+- ANDROID_HOME
   path to the android sdk
-- RM_FRONTEND_PATH  
+- RM_FRONTEND_PATH
   path to the static frontend files (dist)
 
 ## Routes
