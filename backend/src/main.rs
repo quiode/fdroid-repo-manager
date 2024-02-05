@@ -1,6 +1,8 @@
+use actix_cors::Cors;
 use actix_multipart::form::MultipartFormConfig;
-use actix_web::middleware;
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{
+  get, middleware, middleware::Logger, post, web, App, HttpResponse, HttpServer, Responder,
+};
 use env_logger::Env;
 use log::{debug, info};
 
@@ -30,6 +32,15 @@ async fn health() -> impl Responder {
   HttpResponse::Ok().body("Ok!")
 }
 
+#[post("/auth")]
+async fn auth(config: web::Data<AppConfig>, body: String) -> impl Responder {
+  if body == *config.admin_password.value() {
+    HttpResponse::Ok().body("true")
+  } else {
+    HttpResponse::Ok().body("false")
+  }
+}
+
 /// Returns the index.html file
 async fn index() -> actix_web::Result<NamedFile> {
   let app_config = AppConfig::from_env();
@@ -52,7 +63,8 @@ async fn main() -> std::io::Result<()> {
   info!("Server started!");
   debug!("App Config: {:#?}", app_config);
 
-  let fdroid_repository = web::Data::new(Repository::new(app_config.repo_path.value().clone()).unwrap());
+  let fdroid_repository =
+    web::Data::new(Repository::new(app_config.repo_path.value().clone()).unwrap());
   HttpServer::new(move || {
     let logger = Logger::default();
 
@@ -71,10 +83,14 @@ async fn main() -> std::io::Result<()> {
       .wrap(middleware::Compress::default())
       // add logger as middleware
       .wrap(logger)
+      // add cors rules
+      .wrap(Cors::default().allow_any_header().allow_any_method().allow_any_origin())
       .service(
         web::scope("/api")
           // health service for HEALTHCHECK in docker
           .service(health)
+          // service for checking password
+          .service(auth)
           // config services for manipulating fdroid config file
           .service(
             web::scope("/config")
