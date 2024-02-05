@@ -3,7 +3,7 @@ COPY ./backend /usr/src/fdroid-repo-manager/backend/
 WORKDIR /usr/src/fdroid-repo-manager/backend/
 RUN cargo install --path .
 
-FROM node:18-alpine as frontend-builder
+FROM node:20-alpine as frontend-builder
 # Install dependencies
 RUN npm i -g pnpm
 WORKDIR /usr/src/fdroid-repo-manager/frontend/
