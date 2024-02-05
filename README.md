@@ -52,7 +52,5 @@ cargo build
 #### Run
 
 ```bash
-RM_IP=127.0.0.1 RM_PORT=8080 RM_REPO_PATH=/home/quio/Projects/fdroid-repo-manager/development/fdroid RUST_LOG=DEBUG ANDROID_HOME=/opt/android-sdk cargo run
+RM_IP=127.0.0.1 RM_PORT=8080 RM_REPO_PATH=/home/quio/Projects/fdroid-repo-manager/development/fdroid RUST_LOG=DEBUG ANDROID_HOME=/opt/android-sdk RM_FRONTEND_PATH=/home/quio/Projects/fdroid-repo-manager/frontend/dist cargo run
 ```
-
-`RM_REPO_PATH` should be your custom path to the fdroid directory
