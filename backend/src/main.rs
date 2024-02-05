@@ -30,8 +30,8 @@ async fn health() -> impl Responder {
   HttpResponse::Ok().body("Ok!")
 }
 
-/// Returns the angular index.html file
-async fn angular_index() -> actix_web::Result<NamedFile> {
+/// Returns the index.html file
+async fn index() -> actix_web::Result<NamedFile> {
   let app_config = AppConfig::from_env();
 
   Ok(NamedFile::open(
@@ -119,7 +119,7 @@ async fn main() -> std::io::Result<()> {
         actix_files::Files::new("/", app_config.frontend_path.value()).index_file("index.html"),
       )
       // redirect all requests to the frontend if not used by backend
-      .default_service(web::get().to(angular_index))
+      .default_service(web::get().to(index))
   })
   .bind((*app_config_clone.ip.value(), *app_config_clone.port.value()))?
   .run()
